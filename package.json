@@ -1,0 +1,252 @@
+{
+	"name": "middleclass-witch",
+	"displayName": "Middleclass Witch",
+	"description": "Unstructured notes framework using markdown",
+	"version": "0.1.0",
+	"engines": {
+		"vscode": "^1.44.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"main": "./out/infrastructure/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "mw.saveFile",
+				"title": "Save Note",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.openFile",
+				"title": "Open Note",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.archiveProject",
+				"title": "Archive Project",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.archiveClickedProject",
+				"title": "Archive Project",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.createProject",
+				"title": "Create Project",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.createNoteFromTemplate",
+				"title": "Create Note from Template",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.createRecurrence",
+				"title": "Create Recurrence",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.createReference",
+				"title": "Create Reference Folder",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.addDateToLine",
+				"title": "Add date to line",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.toggleTodo",
+				"title": "Toggle todo",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.markTodoAsCancelled",
+				"title": "Mark todo as cancelled",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.markTodoAsComplete",
+				"title": "Mark todo as complete",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.markTodoAsDelegated",
+				"title": "Mark todo as delegated",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.markTodoAsAttentionRequired",
+				"title": "Mark todo as attention-required",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.markTodoAsInProgress",
+				"title": "Mark todo as in progress",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.markTodoAsTodo",
+				"title": "Mark todo as todo",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.todoView.groupBy",
+				"title": "Group by",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.todoView.sortBy",
+				"title": "Sort by",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.todoView.showHide",
+				"title": "Show/Hide",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.openExternalDocument",
+				"title": "Open With Default App",
+				"category": "Middleclass Witch"
+			}
+		],
+		"keybindings": [
+			{
+				"command": "mw.addDateToLine",
+				"key": "Alt+.",
+				"mac": "Alt+."
+			},
+			{
+				"command": "mw.toggleTodo",
+				"key": "Alt+Enter",
+				"mac": "Alt+Enter"
+			},
+			{
+				"command": "mw.markTodoAsCancelled",
+				"key": "Alt+c",
+				"mac": "Alt+c"
+			},
+			{
+				"command": "mw.markTodoAsComplete",
+				"key": "Alt+x",
+				"mac": "Alt+x"
+			},
+			{
+				"command": "mw.markTodoAsAttentionRequired",
+				"key": "Alt+Shift+1",
+				"mac": "Alt+Shift+1"
+			},
+			{
+				"command": "mw.markTodoAsInProgress",
+				"key": "Alt+-",
+				"mac": "Alt+-"
+			},
+			{
+				"command": "mw.markTodoAsDelegated",
+				"key": "Alt+d",
+				"mac": "Alt+d"
+			},
+			{
+				"command": "mw.markTodoAsTodo",
+				"key": "Alt+t",
+				"mac": "Alt+t"
+			}
+		],
+		"views": {
+			"explorer": [
+				{
+					"id": "mw.todoHierarchy",
+					"name": "Todo hierarchy"
+				}
+			]
+		},
+		"menus": {
+			"commandPalette": [
+				{
+					"command": "mw.openExternalDocument",
+					"when": "false"
+				},
+				{
+					"command": "mw.archiveClickedProject",
+					"when": "false"
+				}
+			],
+			"explorer/context": [
+				{
+					"command": "mw.openExternalDocument",
+					"group": "navigation@10"
+				},
+				{
+					"command": "mw.archiveClickedProject",
+					"group": "navigation@10"
+				}
+			],
+			"view/title": [
+				{
+					"command": "mw.todoView.groupBy",
+					"when": "view == mw.todoHierarchy",
+					"group": "navigation"
+				},
+				{
+					"command": "mw.todoView.showHide",
+					"when": "view == mw.todoHierarchy",
+					"group": "navigation"
+				},
+				{
+					"command": "mw.todoView.sortBy",
+					"when": "view == mw.todoHierarchy",
+					"group": "navigation"
+				}
+			]
+		},
+		"languages": [
+			{
+				"aliases": [
+					"Markdown",
+					"md"
+				],
+				"id": "markdown",
+				"extensions": [
+					".md",
+					".markdown"
+				]
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run build",
+		"build": "tsc -p ./",
+		"lint": "eslint src --ext ts",
+		"watch": "tsc -watch -p ./",
+		"test": "mocha --require ts-node/register ./test/**/*.ts"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.1.1",
+		"@types/mocha": "^7.0.2",
+		"@types/node": "^13.11.0",
+		"@types/vscode": "^1.44.0",
+		"@typescript-eslint/eslint-plugin": "^2.30.0",
+		"@typescript-eslint/parser": "^2.30.0",
+		"eslint": "^6.8.0",
+		"glob": "^7.1.6",
+		"mocha": "^7.1.2",
+		"should": "^13.2.3",
+		"testdouble": "^3.16.0",
+		"ts-node": "^8.10.2",
+		"typescript": "^3.8.3",
+		"vscode-test": "^1.3.0"
+	},
+	"publisher": "cfe",
+	"repository": {
+		"url": "https://github.com/cfe84/middleclass-witch"
+	},
+	"dependencies": {
+		"yaml": "^1.10.0"
+	}
+}

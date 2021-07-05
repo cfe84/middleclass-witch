@@ -1,7 +1,7 @@
 import { path } from "./IPath";
 import { IConfig } from "./IConfig";
 import { IStorage } from "./IStorage";
-import { ParsedFolder } from "../domain/FolderTodoParser";
+import { ParsedFolder } from "../domain/FolderParser";
 
 export interface IContext {
   rootFolder: path

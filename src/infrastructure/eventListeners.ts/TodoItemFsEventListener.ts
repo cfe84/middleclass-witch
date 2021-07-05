@@ -2,12 +2,12 @@ import * as vscode from 'vscode';
 import { IDependencies } from '../../contract/IDependencies';
 import { IContext } from '../../contract/IContext';
 import { threadId } from 'worker_threads';
-import { FolderTodoParser } from '../../domain/FolderTodoParser';
+import { FolderParser } from '../../domain/FolderParser';
 import { Document } from 'yaml';
 
 export class TodoItemFsEventListener {
   private lastUpdate = 0
-  constructor(private deps: IDependencies, private ctx: IContext, private parser: FolderTodoParser) {
+  constructor(private deps: IDependencies, private ctx: IContext, private parser: FolderParser) {
   }
 
   private refreshTodos() {

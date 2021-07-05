@@ -2,7 +2,6 @@ import { IDependencies } from '../contract/IDependencies';
 import { IDictionary } from './IDictionary';
 import { IContext } from '../contract/IContext';
 import { SpecialFolder, IFolder } from '../contract/IFolder';
-import { create } from 'domain';
 import { CreateProjectCommand } from '../infrastructure/commands/CreateProjectCommand';
 
 const defaultInboxFolder: string = "10 - Inbox"

@@ -1,9 +1,8 @@
 import { IDependencies } from "../contract/IDependencies";
 import { TodoItem } from "./TodoItem";
-import { LineOperations } from "./LineOperations";
 import { IContext } from "../contract/IContext";
-import { FileInspector } from "./FileInspector";
 import { IDictionary } from "./IDictionary";
+import { FileParser } from "./FileParser";
 
 export interface ParsedFolder {
   todos: TodoItem[]
@@ -11,12 +10,8 @@ export interface ParsedFolder {
   attributeValues: IDictionary<string[]>
 }
 
-export class FolderTodoParser {
-  private lineOperations: LineOperations
-  private fileInspector: FileInspector
-  constructor(private deps: IDependencies, private context: IContext) {
-    this.lineOperations = new LineOperations(deps)
-    this.fileInspector = new FileInspector(deps, context)
+export class FolderParser {
+  constructor(private deps: IDependencies, private context: IContext, private fileParser: FileParser = new FileParser(deps)) {
   }
 
   private parseFile(file: string): TodoItem[] {
@@ -24,16 +19,7 @@ export class FolderTodoParser {
       return []
     }
     const content = `${this.deps.fs.readFileSync(file)}`
-    const lines = content.split("\n")
-    const todos = lines
-      .map((line, number) => this.lineOperations.toTodo(line, number))
-      .filter(todo => todo !== null) as TodoItem[]
-    const inspectionResults = this.fileInspector.inspect(file)
-    todos.forEach(todo => {
-      todo.file = file
-      todo.project = (todo.attributes && todo.attributes.project) ? todo.attributes.project as string : inspectionResults.project
-      todo.folderType = inspectionResults.containingFolderType
-    })
+    const todos = this.fileParser.parseFile(content, file)
     return todos
   }
 

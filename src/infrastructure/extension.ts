@@ -24,7 +24,7 @@ import { MarkTodoAsAttentionRequiredCommand } from './commands/MarkTodoAsAttenti
 import { MarkTodoAsInProgressCommand } from './commands/MarkTodoAsInProgressCommand'
 import { MarkTodoAsTodoCommand } from './commands/MarkTodoAsTodoCommand'
 import { TodoItemFsEventListener } from './eventListeners.ts/TodoItemFsEventListener'
-import { FolderTodoParser } from '../domain/FolderTodoParser'
+import { FolderParser } from '../domain/FolderParser'
 import { TodoHierarchicView } from './views/TodoHierarchicView'
 import { SwitchGroupByCommand } from './commands/SwitchGroupByCommand'
 import { SwitchShowHideCommand } from './commands/SwitchShowHideCommand'
@@ -88,7 +88,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		vscontext.subscriptions.push(disposable);
 	})
 
-	const folderParser = new FolderTodoParser(deps, context)
+	const folderParser = new FolderParser(deps, context)
 	const todoItemFsEventListener = new TodoItemFsEventListener(deps, context, folderParser)
 
 	vscontext.subscriptions.push(

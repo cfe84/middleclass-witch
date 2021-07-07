@@ -8,7 +8,7 @@ import { IContext } from "../src/contract/IContext"
 import { FileParser } from "../src/domain/FileParser"
 const ctx: IContext = fakeContext()
 describe("FolderTodoParser", () => {
-  const makeTodo = (attributes: {[key:string]: string | boolean}): TodoItem => {
+  const makeTodo = (attributes: { [key: string]: string | boolean }): TodoItem => {
     return {
       file: "",
       status: TodoStatus.InProgress,
@@ -35,10 +35,10 @@ describe("FolderTodoParser", () => {
     td.when(deps.fs.lstatSync("ROOT|file.md")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.readFileSync("ROOT|file.md")).thenReturn(Buffer.from(``))
     const rootFileTodos = [
-      makeTodo({"assignee": "Pete", "project": "this project"}),
-      makeTodo({"anotherBooleanAttr": false})
+      makeTodo({ "assignee": "Pete", "project": "this project" }),
+      makeTodo({ "anotherBooleanAttr": false })
     ]
-    td.when(fakeFileParser.parseFile("", "ROOT|file.md")).thenReturn(rootFileTodos)
+    td.when(fakeFileParser.findTodos("", "ROOT|file.md")).thenReturn(rootFileTodos)
     td.when(deps.fs.lstatSync("ROOT|file.txt")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.readFileSync("ROOT|file.txt")).thenReturn(Buffer.from(``))
     td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something")).thenReturn({ isDirectory: () => true })
@@ -46,9 +46,9 @@ describe("FolderTodoParser", () => {
     td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something|file2.md")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.readFileSync("ROOT|PROJECTS|Something|file2.md")).thenReturn(Buffer.from(``))
     const file2Todos = [
-      makeTodo({"assignee": "Leah", "booleanAttribute": true})
+      makeTodo({ "assignee": "Leah", "booleanAttribute": true })
     ]
-    td.when(fakeFileParser.parseFile("", "ROOT|PROJECTS|Something|file2.md")).thenReturn(file2Todos)
+    td.when(fakeFileParser.findTodos("", "ROOT|PROJECTS|Something|file2.md")).thenReturn(file2Todos)
 
     // when
     const parser = new FolderParser(deps, ctx, fakeFileParser)
@@ -61,8 +61,8 @@ describe("FolderTodoParser", () => {
       file2Todos.forEach((todo) => should(todos).containEql(todo))
     })
     it("doesn't load from txt and templates", () => {
-      td.verify(fakeFileParser.parseFile("", "ROOT|.pw|templates|file.md"), {times: 0})
-      td.verify(fakeFileParser.parseFile("", "ROOT|file.txt"), {times: 0})  
+      td.verify(fakeFileParser.findTodos("", "ROOT|.pw|templates|file.md"), { times: 0 })
+      td.verify(fakeFileParser.findTodos("", "ROOT|file.txt"), { times: 0 })
     })
 
 

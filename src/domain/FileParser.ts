@@ -1,7 +1,9 @@
 import { IDependencies } from "../contract/IDependencies"
 import { FileInspector } from "./FileInspector"
+import { FileProperties } from "./FileProperties"
 import { LineOperations } from "./LineOperations"
 import { TodoItem } from "./TodoItem"
+import * as yaml from "yaml"
 
 export class FileParser {
   private lineOperations: LineOperations
@@ -9,8 +11,8 @@ export class FileParser {
   constructor(private deps: IDependencies) {
     this.lineOperations = new LineOperations(deps)
   }
-  
-  parseFile(content: string, file: string): TodoItem[] {
+
+  findTodos(content: string, file: string): TodoItem[] {
     const lines = content.split("\n")
     const todos = lines
       .map((line, number) => this.lineOperations.toTodo(line, number))
@@ -20,5 +22,26 @@ export class FileParser {
       todo.project = (todo.attributes && todo.attributes.project) ? todo.attributes.project as string : ""
     })
     return todos
+  }
+
+  getFileProperties(content: string): FileProperties {
+    const res: FileProperties = {
+      project: undefined,
+      attributes: {}
+    }
+    if (content.length < 3 || content.substr(0, 4) !== "---\n") {
+      return res
+    }
+    const headerEnd = content.indexOf("---", 4)
+    if (headerEnd < 0) {
+      return res
+    }
+    const header = content.substr(4, headerEnd - 4)
+    const parsedHeader = yaml.parse(header)
+    if (parsedHeader.project) {
+      res.project = `${parsedHeader.project}`
+    }
+    res.attributes = parsedHeader
+    return res
   }
 }

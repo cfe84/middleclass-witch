@@ -1,8 +1,7 @@
-import * as should from "should"
 import { makeFakeDeps } from "./FakeDeps"
-import * as td from "testdouble"
 import { FileParser } from "../src/domain/FileParser"
 import { TodoItem, TodoStatus } from "../src/domain/TodoItem"
+import * as should from "should"
 
 describe.only("FileParser", () => {
   context("Todos", () => {
@@ -31,7 +30,7 @@ Some text
     const anInProgressTodo = aDelegatedTodoLn + 4
     // when
     const fileParser = new FileParser(deps)
-    const todos = fileParser.parseFile(content, file)
+    const todos = fileParser.findTodos(content, file)
 
     // then
 
@@ -97,5 +96,56 @@ Some text
       attributes: {},
       line: anInProgressTodo
     }))
+  })
+
+  context("File properties", () => {
+    // given
+    const deps = makeFakeDeps()
+    const parser = new FileParser(deps)
+    const normalFileContent = `---
+project: Something
+attribute1: Something else
+---
+My my
+`
+    const noHeaderFileContent = `This is the content`
+    const doubleHeaderFileContent = `---
+project: 1234
+---
+---
+something: 123
+---
+Bla`
+    const noProjectFileContent = `---
+something: 123
+---`
+    const unclosedHeaderContent = `---
+project: something
+
+idea is to bla`
+    const emptyFileContent = ""
+
+    // when
+    const normalFile = parser.getFileProperties(normalFileContent)
+    const noHeaderFile = parser.getFileProperties(noHeaderFileContent)
+    const doubleHeaderFile = parser.getFileProperties(doubleHeaderFileContent)
+    const noProjectFile = parser.getFileProperties(noProjectFileContent)
+    const unclosedHeader = parser.getFileProperties(unclosedHeaderContent)
+    const emptyFile = parser.getFileProperties(emptyFileContent)
+
+    // then
+    it("loads regular header", () => {
+      should(normalFile.project).eql("Something")
+      should(normalFile.attributes["attribute1"]).eql("Something else")
+    })
+    it("works for no header", () => should(noHeaderFile.project).be.undefined())
+    it("ignores second header", () => should(doubleHeaderFile.attributes["something"]).be.undefined())
+    it("handles header with no project", () => {
+      should(noProjectFile.project).be.undefined()
+      should(noProjectFile.attributes["something"]).eql(123)
+    })
+    it("ignores header if not closed", () => should(unclosedHeader.project).be.undefined())
+    it("ignores empty file", () => should(emptyFile.project).be.undefined())
+
   })
 })

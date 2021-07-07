@@ -19,7 +19,7 @@ export class FolderParser {
       return []
     }
     const content = `${this.deps.fs.readFileSync(file)}`
-    const todos = this.fileParser.parseFile(content, file)
+    const todos = this.fileParser.findTodos(content, file)
     return todos
   }
 

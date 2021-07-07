@@ -3,9 +3,11 @@ import { TodoItem } from "./TodoItem";
 import { IContext } from "../contract/IContext";
 import { IDictionary } from "./IDictionary";
 import { FileParser } from "./FileParser";
+import { ParsedFile } from "./ParsedFile";
 
 export interface ParsedFolder {
   todos: TodoItem[]
+  projects: string[]
   attributes: string[]
   attributeValues: IDictionary<string[]>
 }
@@ -14,54 +16,58 @@ export class FolderParser {
   constructor(private deps: IDependencies, private context: IContext, private fileParser: FileParser = new FileParser(deps)) {
   }
 
-  private parseFile(file: string): TodoItem[] {
+  private parseFile(file: string): ParsedFile | undefined {
     if (!file.endsWith(".md")) {
-      return []
+      return undefined
     }
     const content = `${this.deps.fs.readFileSync(file)}`
     const todos = this.fileParser.findTodos(content, file)
-    return todos
+    const fileProperties = this.fileParser.getFileProperties(content)
+    return {
+      todos,
+      fileProperties
+    }
   }
 
-  private findFolderTodos(folder: string): TodoItem[] {
+  private findFolderFiles(folder: string): ParsedFile[] {
     if (folder === this.context.templatesFolder) {
       return []
     }
     const files = this.deps.fs.readdirSync(folder)
-    const todos = files
+    const parsedFiles = files
       .map(file => this.deps.path.join(folder, file))
       .map((file) =>
         this.deps.fs.lstatSync(file).isDirectory() ?
-          this.findFolderTodos(file) :
-          this.parseFile(file)
+          this.findFolderFiles(file) :
+          [this.parseFile(file)]
       )
+      .reduce((prev, curr) => {
+        prev = prev.concat(curr
+          .filter(project => project !== undefined))
+        return prev
+      }, [])
+    return parsedFiles as ParsedFile[]
+  }
+
+  private aggregateTodos(files: ParsedFile[]): TodoItem[] {
+    return files
+      .map(file => file.todos)
       .reduce((prev, curr) => {
         prev = prev.concat(curr)
         return prev
       }, [])
-    return todos
   }
 
   public parseFolder(folder: string): ParsedFolder {
-    const todos = this.findFolderTodos(folder)
-    const attributes: IDictionary<string[]> = {}
-    todos.forEach(todo => {
-      if (!todo.attributes) {
-        return
-      }
-      const todoAttributes = todo.attributes
-      Object.keys(todoAttributes).forEach(attribute => {
-        if (!attributes[attribute]) {
-          attributes[attribute] = []
-        }
-        if (todoAttributes[attribute] !== true && attributes[attribute].indexOf(todoAttributes[attribute] as string) < 0) {
-          attributes[attribute].push(todoAttributes[attribute] as string)
-        }
-      })
-    })
+    const files = this.findFolderFiles(folder)
+    const attributes: IDictionary<string[]> = this.listAttributes(files);
 
+    const projects = this.listProjects(files)
+
+    const todos = this.aggregateTodos(files)
     const parsedFolder: ParsedFolder = {
       todos,
+      projects,
       attributes: Object.keys(attributes).sort((a, b) => a.localeCompare(b)),
       attributeValues: attributes
     }
@@ -72,10 +78,44 @@ export class FolderParser {
       attributes["selected"] = []
     }
     todos.forEach(todo => {
-      if (todo.project !== undefined && !attributes["project"].find(value => value === todo.project)) {
+      if (todo.project !== undefined && todo.project !== "" && !attributes["project"].find(value => value === todo.project)) {
         attributes["project"].push(todo.project)
       }
     })
     return parsedFolder
+  }
+
+  private listAttributes(files: ParsedFile[]) {
+    const attributes: IDictionary<string[]> = {};
+    const addAttributes = (todoAttributes: IDictionary<any>) => {
+      Object.keys(todoAttributes).forEach(attribute => {
+        if (!attributes[attribute]) {
+          attributes[attribute] = [];
+        }
+        if (todoAttributes[attribute] !== true
+          && `${todoAttributes[attribute]}`.length > 0
+          && attributes[attribute].indexOf(`${todoAttributes[attribute]}`) < 0) {
+          attributes[attribute].push(`${todoAttributes[attribute]}`);
+        }
+      });
+    }
+    files.forEach(file => {
+      if (file.fileProperties?.attributes) {
+        addAttributes(file.fileProperties.attributes)
+      }
+      file.todos.forEach(todo => {
+        if (todo.attributes) {
+          addAttributes(todo.attributes)
+        }
+      })
+    })
+    return attributes;
+  }
+
+  private listProjects(files: ParsedFile[]) {
+    return files
+      .map(file => file.fileProperties?.project)
+      .filter(project => project !== undefined)
+      .filter((project, index, arr) => arr.indexOf(project) === index) as string[];
   }
 }

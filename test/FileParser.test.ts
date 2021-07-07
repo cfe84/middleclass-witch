@@ -2,8 +2,9 @@ import { makeFakeDeps } from "./FakeDeps"
 import { FileParser } from "../src/domain/FileParser"
 import { TodoItem, TodoStatus } from "../src/domain/TodoItem"
 import * as should from "should"
+import { TestUtils } from "./TestUtils"
 
-describe.only("FileParser", () => {
+describe("FileParser", () => {
   context("Todos", () => {
     const deps = makeFakeDeps()
     const projectName = ""
@@ -34,26 +35,8 @@ Some text
 
     // then
 
-    const objectEql = (expected: { [key: string]: any }, actual: { [key: string]: any }): boolean => {
-      const keys = Object.keys(expected)
-      const actualDoesntMatchForKey = (key: string) => {
-        if (typeof expected[key] === "object") {
-          return actual[key] === undefined
-            || typeof actual[key] !== "object"
-            || !objectEql(expected[key], actual[key])
-        } else {
-          return expected[key] !== actual[key]
-        }
-      }
-      return keys.length === 0 || !keys.find(actualDoesntMatchForKey)
-    }
-
-    const findObj = (array: object[], expected: object) => {
-      return array.find(obj => objectEql(expected, obj))
-    }
-
     const containsTodo = (expected: Partial<TodoItem>) => {
-      const found = findObj(todos, expected)
+      const found = TestUtils.findObj(todos, expected)
       if (!found) {
         throw (Error(`Expected to find ${JSON.stringify(expected, null, 2)} in ${JSON.stringify(todos, null, 2)}`))
       }

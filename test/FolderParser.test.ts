@@ -6,15 +6,16 @@ import { TodoItem, TodoStatus } from "../src/domain/TodoItem"
 import { FolderParser } from "../src/domain/FolderParser"
 import { IContext } from "../src/contract/IContext"
 import { FileParser } from "../src/domain/FileParser"
+import { FileProperties } from "../src/domain/FileProperties"
 const ctx: IContext = fakeContext()
 describe("FolderTodoParser", () => {
-  const makeTodo = (attributes: { [key: string]: string | boolean }): TodoItem => {
+  const makeTodo = (attributes: { [key: string]: string | boolean }, project: string = ""): TodoItem => {
     return {
       file: "",
       status: TodoStatus.InProgress,
       text: '',
       attributes,
-      project: "Something"
+      project
     }
   }
   context("Hierarchy", () => {
@@ -33,22 +34,37 @@ describe("FolderTodoParser", () => {
     td.when(deps.fs.lstatSync("ROOT|.pw|templates|file.md")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.readFileSync("ROOT|.pw|templates|file.md")).thenReturn(Buffer.from(``))
     td.when(deps.fs.lstatSync("ROOT|file.md")).thenReturn({ isDirectory: () => false })
-    td.when(deps.fs.readFileSync("ROOT|file.md")).thenReturn(Buffer.from(``))
+    td.when(deps.fs.readFileSync("ROOT|file.md")).thenReturn(Buffer.from(`root`))
+    const rootFileProperties: FileProperties = {
+      project: undefined,
+      attributes: {}
+    }
     const rootFileTodos = [
       makeTodo({ "assignee": "Pete", "project": "this project" }),
-      makeTodo({ "anotherBooleanAttr": false })
+      makeTodo({ "anotherBooleanAttr": false }, "Something")
     ]
-    td.when(fakeFileParser.findTodos("", "ROOT|file.md")).thenReturn(rootFileTodos)
+    td.when(fakeFileParser.findTodos("root", "ROOT|file.md")).thenReturn(rootFileTodos)
+    td.when(fakeFileParser.getFileProperties("root")).thenReturn(rootFileProperties)
+
     td.when(deps.fs.lstatSync("ROOT|file.txt")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.readFileSync("ROOT|file.txt")).thenReturn(Buffer.from(``))
     td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something")).thenReturn({ isDirectory: () => true })
     td.when(deps.fs.readdirSync("ROOT|PROJECTS|Something")).thenReturn(["file2.md"])
     td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something|file2.md")).thenReturn({ isDirectory: () => false })
-    td.when(deps.fs.readFileSync("ROOT|PROJECTS|Something|file2.md")).thenReturn(Buffer.from(``))
+    td.when(deps.fs.readFileSync("ROOT|PROJECTS|Something|file2.md")).thenReturn(Buffer.from(`file2`))
     const file2Todos = [
       makeTodo({ "assignee": "Leah", "booleanAttribute": true })
     ]
-    td.when(fakeFileParser.findTodos("", "ROOT|PROJECTS|Something|file2.md")).thenReturn(file2Todos)
+    const file2Properties: FileProperties = {
+      attributes: {
+        "assignee": "Louis",
+        "projectAttribute": "projectValue",
+        "project": "pj1"
+      },
+      project: "pj1"
+    }
+    td.when(fakeFileParser.findTodos("file2", "ROOT|PROJECTS|Something|file2.md")).thenReturn(file2Todos)
+    td.when(fakeFileParser.getFileProperties("file2")).thenReturn(file2Properties)
 
     // when
     const parser = new FolderParser(deps, ctx, fakeFileParser)
@@ -60,15 +76,16 @@ describe("FolderTodoParser", () => {
       rootFileTodos.forEach((todo) => should(todos).containEql(todo))
       file2Todos.forEach((todo) => should(todos).containEql(todo))
     })
+
     it("doesn't load from txt and templates", () => {
       td.verify(fakeFileParser.findTodos("", "ROOT|.pw|templates|file.md"), { times: 0 })
       td.verify(fakeFileParser.findTodos("", "ROOT|file.txt"), { times: 0 })
     })
 
-
     it("loads attributes", () => {
       should(parsedFolder.attributes).containEql("assignee")
       should(parsedFolder.attributes).containEql("project")
+      should(parsedFolder.attributes).containEql("projectAttribute")
       should(parsedFolder.attributes).containEql("booleanAttribute")
       should(parsedFolder.attributes).containEql("anotherBooleanAttr")
     })
@@ -78,9 +95,18 @@ describe("FolderTodoParser", () => {
       should(parsedFolder.attributeValues["project"]).containEql("this project")
     })
     it("adds projects as attribute values", () => {
+      should(parsedFolder.attributeValues["project"]).length(3)
       should(parsedFolder.attributeValues["project"]).containEql("Something")
     })
+    it("adds attributes from file header", () => {
+      should(parsedFolder.attributeValues["assignee"]).containEql("Louis")
+      should(parsedFolder.attributeValues["project"]).containEql("pj1")
+    })
+    it("loads projects", () => {
+      should(parsedFolder.projects).deepEqual(["pj1"])
+    })
   })
+
   context("No content", () => {
     // given
     const rootFolder = "ROOT"

@@ -7,7 +7,7 @@ import { IContext } from '../../contract/IContext';
 export class CreateReferenceFolderCommand implements ICommand<string | null> {
   constructor(private deps: IDependencies, private context: IContext) {
   }
-  get Id(): string { return "pw.createReference" }
+  get Id(): string { return "mw.createReference" }
 
   executeAsync = async (): Promise<string | null> => {
     const folderSelector = new FolderSelector({}, this.deps, this.context)

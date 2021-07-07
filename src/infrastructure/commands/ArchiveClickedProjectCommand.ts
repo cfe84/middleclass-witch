@@ -15,7 +15,7 @@ interface File {
 export class ArchiveClickedProjectCommand implements ICommand<string | null> {
   constructor(private deps: IDependencies, private context: IContext) {
   }
-  get Id(): string { return "pw.archiveClickedProject" }
+  get Id(): string { return "mw.archiveClickedProject" }
 
   executeAsync = async (file: File): Promise<string | null> => {
     this.deps.logger.log(`Open ${file.fsPath}`)

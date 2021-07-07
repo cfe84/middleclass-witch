@@ -7,7 +7,7 @@ import { SubstituteLine } from './SubstituteLine';
 export class MarkTodoAsCancelledCommand implements ICommand<string | null> {
   constructor(private deps: IDependencies, context: IContext) {
   }
-  get Id(): string { return "pw.markTodoAsCancelled" }
+  get Id(): string { return "mw.markTodoAsCancelled" }
 
   executeAsync = async (): Promise<string | null> => {
     const lineOperations = new LineOperations(this.deps)

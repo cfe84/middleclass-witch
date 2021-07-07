@@ -18,6 +18,6 @@ export class OpenAtLineCommand implements ICommand<string | null> {
     }
     return null
   }
-  get Id(): string { return "pw.openAtLine" };
+  get Id(): string { return "mw.openAtLine" };
 
 }

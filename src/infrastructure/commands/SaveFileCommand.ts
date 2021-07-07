@@ -13,7 +13,7 @@ export class SaveFileCommand implements ICommand<string | null> {
     this.fileNameAssembler = new FileNameAssembler(deps)
     this.fileSaveSelector = new FileSaveSelector(deps, context)
   }
-  get Id(): string { return "pw.saveFile" }
+  get Id(): string { return "mw.saveFile" }
 
   executeAsync = async (): Promise<string | null> => {
     if (!vscode.window.activeTextEditor) {

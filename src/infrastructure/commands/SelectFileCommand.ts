@@ -6,7 +6,7 @@ import { FolderSelector } from "../../domain/FolderSelector";
 import { FileSelector } from "../../domain/FileSelector";
 import { IFolder } from '../../contract/IFolder';
 
-export class OpenFileCommand implements ICommand<string | null> {
+export class SelectFileCommand implements ICommand<string | null> {
   constructor(private deps: IDependencies, private context: IContext) {
   }
   executeAsync = async (): Promise<string | null> => {
@@ -24,6 +24,6 @@ export class OpenFileCommand implements ICommand<string | null> {
     vscode.window.showTextDocument(vscode.Uri.file(file))
     return file
   }
-  get Id(): string { return "pw.openFile" };
+  get Id(): string { return "mw.selectFile" };
 
 }

@@ -7,7 +7,7 @@ import { IContext } from '../../contract/IContext';
 export class CreateRecurrenceCommand implements ICommand<string | null> {
   constructor(private deps: IDependencies, private context: IContext) {
   }
-  get Id(): string { return "pw.createRecurrence" }
+  get Id(): string { return "mw.createRecurrence" }
 
   executeAsync = async (): Promise<string | null> => {
     const folderSelector = new FolderSelector({}, this.deps, this.context)

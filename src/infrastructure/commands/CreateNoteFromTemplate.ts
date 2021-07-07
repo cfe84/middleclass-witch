@@ -14,7 +14,7 @@ export class CreateNoteFromTemplate implements ICommand<string | null> {
     this.templateSelector = new TemplateSelector(deps, context)
     this.fileSaveSelector = new FileSaveSelector(deps, context)
   }
-  get Id(): string { return "pw.createNoteFromTemplate" }
+  get Id(): string { return "mw.createNoteFromTemplate" }
 
   private async replaceVariables(templateContent: string): Promise<string | null> {
     const templateProcessor = new TemplateProcessor()

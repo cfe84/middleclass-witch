@@ -7,7 +7,7 @@ import { StdDate } from './StdDate'
 import { VSUiSelector } from './selectors/VSUiSelector'
 import { IDependencies } from '../contract/IDependencies'
 import { IContext } from '../contract/IContext'
-import { OpenFileCommand } from './commands/OpenFileCommand'
+import { SelectFileCommand } from './commands/SelectFileCommand'
 import { ICommand } from './commands/ICommand'
 import { ArchiveProjectCommand } from './commands/ArchiveProjectCommand'
 import { CreateProjectCommand } from './commands/CreateProjectCommand'
@@ -33,6 +33,7 @@ import { AttributeCompletionItemProvider, AttributeCompletionTriggerCharacters }
 import { OpenExternalDocument } from './commands/OpenExternalDocumentCommand'
 import { OpenAtLineCommand } from './commands/OpenAtLineCommand'
 import { ArchiveClickedProjectCommand } from './commands/ArchiveClickedProjectCommand'
+import { FileHierarchicView } from './views/FileHierarchicView'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -58,14 +59,14 @@ export function activate(vscontext: vscode.ExtensionContext) {
 	const context: IContext = {
 		rootFolder,
 		config: config || undefined,
-		parsedFolder: { todos: [], attributes: [], attributeValues: {} },
+		parsedFolder: { todos: [], attributes: [], attributeValues: {}, projects: [] },
 		storage: vscontext.globalState,
 		templatesFolder: deps.path.join(rootFolder, ".pw", "templates")
 	}
 
 	const commands: ICommand<string | null>[] = [
 		new SaveFileCommand(deps, context),
-		new OpenFileCommand(deps, context),
+		new SelectFileCommand(deps, context),
 		new ArchiveProjectCommand(deps, context),
 		new ArchiveClickedProjectCommand(deps, context),
 		new CreateProjectCommand(deps, context),
@@ -110,7 +111,10 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		let disposable = vscode.commands.registerCommand(command.Id, command.executeAsync);
 		vscontext.subscriptions.push(disposable);
 	})
-	vscode.window.registerTreeDataProvider("pw.todoHierarchy", todosView)
+	vscode.window.registerTreeDataProvider("mw.todoHierarchy", todosView)
+
+	const filesView = new FileHierarchicView(deps, context)
+	vscode.window.registerTreeDataProvider("mw.filesHierarchy", filesView)
 
 	const attributeCompletion = new AttributeCompletionItemProvider(deps, context)
 	vscontext.subscriptions.push(

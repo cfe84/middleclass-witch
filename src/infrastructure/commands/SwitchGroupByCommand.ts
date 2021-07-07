@@ -11,7 +11,7 @@ class GroupByMenuOption {
 export class SwitchGroupByCommand implements ICommand<string | null> {
   constructor(private deps: IDependencies, private context: IContext, private todoView: TodoHierarchicView) {
   }
-  get Id(): string { return "pw.todoView.groupBy" }
+  get Id(): string { return "mw.todoView.groupBy" }
 
   executeAsync = async (): Promise<string | null> => {
     const options = [

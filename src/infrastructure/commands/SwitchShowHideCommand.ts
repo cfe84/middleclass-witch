@@ -12,7 +12,7 @@ class ShowHideMenuOption {
 export class SwitchShowHideCommand implements ICommand<string | null> {
   constructor(private deps: IDependencies, private context: IContext, private todoView: TodoHierarchicView) {
   }
-  get Id(): string { return "pw.todoView.showHide" }
+  get Id(): string { return "mw.todoView.showHide" }
 
   executeAsync = async (): Promise<string | null> => {
     const option = await vscode.window.showQuickPick([

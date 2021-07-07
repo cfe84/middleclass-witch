@@ -33,6 +33,6 @@ export class ArchiveProjectCommand implements ICommand<string | null> {
     this.deps.fs.renameSync(objectToArchive, destination)
     return projectFolderName
   }
-  get Id(): string { return "pw.archiveProject" };
+  get Id(): string { return "mw.archiveProject" };
 
 }

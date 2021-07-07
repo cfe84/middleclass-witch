@@ -8,7 +8,7 @@ import { SubstituteLine } from './SubstituteLine';
 export class AddDateToLineCommand implements ICommand<string | null> {
   constructor(private deps: IDependencies, context: IContext) {
   }
-  get Id(): string { return "pw.addDateToLine" }
+  get Id(): string { return "mw.addDateToLine" }
 
   executeAsync = async (): Promise<string | null> => {
     const lineOperations = new LineOperations(this.deps)

@@ -21,7 +21,7 @@
 				"category": "Middleclass Witch"
 			},
 			{
-				"command": "mw.openFile",
+				"command": "mw.selectFile",
 				"title": "Open Note",
 				"category": "Middleclass Witch"
 			},
@@ -162,7 +162,11 @@
 			"explorer": [
 				{
 					"id": "mw.todoHierarchy",
-					"name": "Todo hierarchy"
+					"name": "MW Todos"
+				},
+				{
+					"id": "mw.filesHierarchy",
+					"name": "MW Files"
 				}
 			]
 		},

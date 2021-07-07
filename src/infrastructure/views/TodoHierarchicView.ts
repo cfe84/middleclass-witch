@@ -121,14 +121,14 @@ export interface SortByConfig {
   attributeName?: string
 }
 
-const STORAGEKEY_SHOWSELECTEDONTOP = "todoView.showSelectedOnTop"
-const STORAGEKEY_SHOWPROJECTSONTOP = "todoView.showProjectsOnTop"
-const STORAGEKEY_SHOWOVERDUEONTOP = "todoView.showOverdueOnTop"
-const STORAGEKEY_SHOWCOMPLETED = "todoView.showCompleted"
-const STORAGEKEY_SHOWCANCELED = "todoView.showCanceled"
-const STORAGEKEY_SHOWEMPTY = "todoView.showEmpty"
-const STORAGEKEY_GROUPBY = "todoView.groupBy"
-const STORAGEKEY_SORTBY = "todoView.sortBy"
+const STORAGEKEY_SHOWSELECTEDONTOP = "mw.todoView.showSelectedOnTop"
+const STORAGEKEY_SHOWPROJECTSONTOP = "mw.todoView.showProjectsOnTop"
+const STORAGEKEY_SHOWOVERDUEONTOP = "mw.todoView.showOverdueOnTop"
+const STORAGEKEY_SHOWCOMPLETED = "mw.todoView.showCompleted"
+const STORAGEKEY_SHOWCANCELED = "mw.todoView.showCanceled"
+const STORAGEKEY_SHOWEMPTY = "mw.todoView.showEmpty"
+const STORAGEKEY_GROUPBY = "mw.todoView.groupBy"
+const STORAGEKEY_SORTBY = "mw.todoView.sortBy"
 
 export class TodoHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> {
 

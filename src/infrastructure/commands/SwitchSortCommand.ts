@@ -11,7 +11,7 @@ class SortByMenuOption {
 export class SwitchSortByCommand implements ICommand<string | null> {
   constructor(private deps: IDependencies, private context: IContext, private todoView: TodoHierarchicView) {
   }
-  get Id(): string { return "pw.todoView.sortBy" }
+  get Id(): string { return "mw.todoView.sortBy" }
 
   executeAsync = async (): Promise<string | null> => {
     const currentConfig = this.todoView.sortBy

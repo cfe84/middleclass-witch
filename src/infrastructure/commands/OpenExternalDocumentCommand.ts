@@ -15,7 +15,7 @@ interface File {
 export class OpenExternalDocument implements ICommand<string | null> {
   constructor(private deps: IDependencies, context: IContext) {
   }
-  get Id(): string { return "pw.openExternalDocument" }
+  get Id(): string { return "mw.openExternalDocument" }
 
   executeAsync = async (file: File): Promise<string | null> => {
     this.deps.logger.log(`Open ${file.fsPath}`)

@@ -7,6 +7,8 @@ import { FolderParser } from "../src/domain/FolderParser"
 import { IContext } from "../src/contract/IContext"
 import { FileParser } from "../src/domain/FileParser"
 import { FileProperties } from "../src/domain/FileProperties"
+import { TestUtils } from "./TestUtils"
+import { Project } from "../src/domain/Project"
 const ctx: IContext = fakeContext()
 describe("FolderTodoParser", () => {
   const makeTodo = (attributes: { [key: string]: string | boolean }, project: string = ""): TodoItem => {
@@ -37,6 +39,7 @@ describe("FolderTodoParser", () => {
     td.when(deps.fs.readFileSync("ROOT|file.md")).thenReturn(Buffer.from(`root`))
     const rootFileProperties: FileProperties = {
       project: undefined,
+      file: "ROOT|file.md",
       attributes: {}
     }
     const rootFileTodos = [
@@ -44,7 +47,7 @@ describe("FolderTodoParser", () => {
       makeTodo({ "anotherBooleanAttr": false }, "Something")
     ]
     td.when(fakeFileParser.findTodos("root", "ROOT|file.md")).thenReturn(rootFileTodos)
-    td.when(fakeFileParser.getFileProperties("root")).thenReturn(rootFileProperties)
+    td.when(fakeFileParser.getFileProperties("root", "ROOT|file.md")).thenReturn(rootFileProperties)
 
     td.when(deps.fs.lstatSync("ROOT|file.txt")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.readFileSync("ROOT|file.txt")).thenReturn(Buffer.from(``))
@@ -61,10 +64,11 @@ describe("FolderTodoParser", () => {
         "projectAttribute": "projectValue",
         "project": "pj1"
       },
+      file: "ROOT|PROJECTS|Something|file2.md",
       project: "pj1"
     }
     td.when(fakeFileParser.findTodos("file2", "ROOT|PROJECTS|Something|file2.md")).thenReturn(file2Todos)
-    td.when(fakeFileParser.getFileProperties("file2")).thenReturn(file2Properties)
+    td.when(fakeFileParser.getFileProperties("file2", "ROOT|PROJECTS|Something|file2.md")).thenReturn(file2Properties)
 
     // when
     const parser = new FolderParser(deps, ctx, fakeFileParser)
@@ -103,7 +107,11 @@ describe("FolderTodoParser", () => {
       should(parsedFolder.attributeValues["project"]).containEql("pj1")
     })
     it("loads projects", () => {
-      should(parsedFolder.projects).deepEqual(["pj1"])
+      const project = TestUtils.findObj(parsedFolder.projects, {
+        name: "pj1"
+      }) as Project
+      should(project).not.be.undefined()
+      should(project.files).deepEqual(["ROOT|PROJECTS|Something|file2.md"])
     })
   })
 

@@ -24,9 +24,10 @@ export class FileParser {
     return todos
   }
 
-  getFileProperties(content: string): FileProperties {
+  getFileProperties(content: string, file: string): FileProperties {
     const res: FileProperties = {
       project: undefined,
+      file,
       attributes: {}
     }
     if (content.length < 3 || content.substr(0, 4) !== "---\n") {

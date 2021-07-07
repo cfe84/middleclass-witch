@@ -4,10 +4,11 @@ import { IContext } from "../contract/IContext";
 import { IDictionary } from "./IDictionary";
 import { FileParser } from "./FileParser";
 import { ParsedFile } from "./ParsedFile";
+import { Project } from "./Project";
 
 export interface ParsedFolder {
   todos: TodoItem[]
-  projects: string[]
+  projects: Project[]
   attributes: string[]
   attributeValues: IDictionary<string[]>
 }
@@ -22,7 +23,7 @@ export class FolderParser {
     }
     const content = `${this.deps.fs.readFileSync(file)}`
     const todos = this.fileParser.findTodos(content, file)
-    const fileProperties = this.fileParser.getFileProperties(content)
+    const fileProperties = this.fileParser.getFileProperties(content, file)
     return {
       todos,
       fileProperties
@@ -112,10 +113,22 @@ export class FolderParser {
     return attributes;
   }
 
-  private listProjects(files: ParsedFile[]) {
-    return files
-      .map(file => file.fileProperties?.project)
+  private listProjects(files: ParsedFile[]): Project[] {
+    const projects: { [key: string]: string[] } = {}
+
+    files
+      .map(file => file.fileProperties)
       .filter(project => project !== undefined)
-      .filter((project, index, arr) => arr.indexOf(project) === index) as string[];
+      .forEach(project => {
+        const name = project.project as string
+        if (!projects[name]) {
+          projects[name] = []
+        }
+        projects[name].push(project.file)
+      })
+    return Object.keys(projects).map(name => ({
+      name,
+      files: projects[name]
+    }))
   }
 }

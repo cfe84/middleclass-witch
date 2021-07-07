@@ -109,17 +109,18 @@ idea is to bla`
     const emptyFileContent = ""
 
     // when
-    const normalFile = parser.getFileProperties(normalFileContent)
-    const noHeaderFile = parser.getFileProperties(noHeaderFileContent)
-    const doubleHeaderFile = parser.getFileProperties(doubleHeaderFileContent)
-    const noProjectFile = parser.getFileProperties(noProjectFileContent)
-    const unclosedHeader = parser.getFileProperties(unclosedHeaderContent)
-    const emptyFile = parser.getFileProperties(emptyFileContent)
+    const normalFile = parser.getFileProperties(normalFileContent, "normal")
+    const noHeaderFile = parser.getFileProperties(noHeaderFileContent, "")
+    const doubleHeaderFile = parser.getFileProperties(doubleHeaderFileContent, "")
+    const noProjectFile = parser.getFileProperties(noProjectFileContent, "")
+    const unclosedHeader = parser.getFileProperties(unclosedHeaderContent, "")
+    const emptyFile = parser.getFileProperties(emptyFileContent, "")
 
     // then
     it("loads regular header", () => {
       should(normalFile.project).eql("Something")
       should(normalFile.attributes["attribute1"]).eql("Something else")
+      should(normalFile.file).eql("normal")
     })
     it("works for no header", () => should(noHeaderFile.project).be.undefined())
     it("ignores second header", () => should(doubleHeaderFile.attributes["something"]).be.undefined())

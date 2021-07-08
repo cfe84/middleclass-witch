@@ -285,7 +285,7 @@ export class TodoHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
 
   private getSelectedGroup(): Group {
     const getSelectedTasks = (): TodoItem[] =>
-      this.context.parsedFolder.todos.filter(todo => todo.attributes && todo.attributes.selected)
+      this.context.parsedFolder.todos.filter((todo) => todo.attributes && todo.attributes.selected)
     return new Group("Selected tasks", this.groomTodos(getSelectedTasks()))
   }
 

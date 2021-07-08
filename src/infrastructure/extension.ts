@@ -31,7 +31,7 @@ import { SwitchShowHideCommand } from './commands/SwitchShowHideCommand'
 import { SwitchSortByCommand } from './commands/SwitchSortCommand'
 import { AttributeCompletionItemProvider, AttributeCompletionTriggerCharacters } from './completion/AttributeCompletionItemProvider'
 import { OpenExternalDocument } from './commands/OpenExternalDocumentCommand'
-import { OpenAtLineCommand } from './commands/OpenAtLineCommand'
+import { OpenFileCommand } from './commands/OpenFileCommand'
 import { ArchiveClickedProjectCommand } from './commands/ArchiveClickedProjectCommand'
 import { FileHierarchicView } from './views/FileHierarchicView'
 
@@ -59,7 +59,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 	const context: IContext = {
 		rootFolder,
 		config: config || undefined,
-		parsedFolder: { todos: [], attributes: [], attributeValues: {}, projects: [] },
+		parsedFolder: { todos: [], attributes: [], attributeValues: {}, files: [] },
 		storage: vscontext.globalState,
 		templatesFolder: deps.path.join(rootFolder, ".pw", "templates")
 	}
@@ -82,7 +82,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		new MarkTodoAsInProgressCommand(deps, context),
 		new MarkTodoAsTodoCommand(deps, context),
 		new OpenExternalDocument(deps, context),
-		new OpenAtLineCommand(deps, context)
+		new OpenFileCommand(deps, context)
 	]
 	commands.forEach(command => {
 		let disposable = vscode.commands.registerCommand(command.Id, command.executeAsync);
@@ -101,7 +101,6 @@ export function activate(vscontext: vscode.ExtensionContext) {
 	context.parsedFolder = folderParser.parseFolder(context.rootFolder)
 
 	const todosView = new TodoHierarchicView(deps, context)
-	todoItemFsEventListener.fileDidChange.push(() => todosView.refresh())
 	const viewCommands = [
 		new SwitchGroupByCommand(deps, context, todosView),
 		new SwitchShowHideCommand(deps, context, todosView),
@@ -115,6 +114,11 @@ export function activate(vscontext: vscode.ExtensionContext) {
 
 	const filesView = new FileHierarchicView(deps, context)
 	vscode.window.registerTreeDataProvider("mw.filesHierarchy", filesView)
+
+	todoItemFsEventListener.fileDidChange.push(() => {
+		todosView.refresh()
+		filesView.refresh()
+	})
 
 	const attributeCompletion = new AttributeCompletionItemProvider(deps, context)
 	vscontext.subscriptions.push(

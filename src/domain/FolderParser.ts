@@ -4,14 +4,9 @@ import { IContext } from "../contract/IContext";
 import { IDictionary } from "./IDictionary";
 import { FileParser } from "./FileParser";
 import { ParsedFile } from "./ParsedFile";
-import { Project } from "./Project";
+import { ParsedFolder } from "./ParsedFolder";
 
-export interface ParsedFolder {
-  todos: TodoItem[]
-  projects: Project[]
-  attributes: string[]
-  attributeValues: IDictionary<string[]>
-}
+
 
 export class FolderParser {
   constructor(private deps: IDependencies, private context: IContext, private fileParser: FileParser = new FileParser(deps)) {
@@ -62,13 +57,10 @@ export class FolderParser {
   public parseFolder(folder: string): ParsedFolder {
     const files = this.findFolderFiles(folder)
     const attributes: IDictionary<string[]> = this.listAttributes(files);
-
-    const projects = this.listProjects(files)
-
     const todos = this.aggregateTodos(files)
     const parsedFolder: ParsedFolder = {
       todos,
-      projects,
+      files,
       attributes: Object.keys(attributes).sort((a, b) => a.localeCompare(b)),
       attributeValues: attributes
     }
@@ -113,22 +105,22 @@ export class FolderParser {
     return attributes;
   }
 
-  private listProjects(files: ParsedFile[]): Project[] {
-    const projects: { [key: string]: string[] } = {}
+  // private listProjects(files: ParsedFile[]): Project[] {
+  //   const projects: { [key: string]: string[] } = {}
 
-    files
-      .map(file => file.fileProperties)
-      .filter(project => project !== undefined)
-      .forEach(project => {
-        const name = project.project as string
-        if (!projects[name]) {
-          projects[name] = []
-        }
-        projects[name].push(project.file)
-      })
-    return Object.keys(projects).map(name => ({
-      name,
-      files: projects[name]
-    }))
-  }
+  //   files
+  //     .map(file => file.fileProperties)
+  //     .filter(project => project !== undefined)
+  //     .forEach(project => {
+  //       const name = project.project as string
+  //       if (!projects[name]) {
+  //         projects[name] = []
+  //       }
+  //       projects[name].push(project.path)
+  //     })
+  //   return Object.keys(projects).map(name => ({
+  //     name,
+  //     files: projects[name]
+  //   }))
+  // }
 }

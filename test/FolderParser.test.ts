@@ -9,6 +9,7 @@ import { FileParser } from "../src/domain/FileParser"
 import { FileProperties } from "../src/domain/FileProperties"
 import { TestUtils } from "./TestUtils"
 import { Project } from "../src/domain/Project"
+import { ParsedFile } from "../src/domain/ParsedFile"
 const ctx: IContext = fakeContext()
 describe("FolderTodoParser", () => {
   const makeTodo = (attributes: { [key: string]: string | boolean }, project: string = ""): TodoItem => {
@@ -39,7 +40,8 @@ describe("FolderTodoParser", () => {
     td.when(deps.fs.readFileSync("ROOT|file.md")).thenReturn(Buffer.from(`root`))
     const rootFileProperties: FileProperties = {
       project: undefined,
-      file: "ROOT|file.md",
+      path: "ROOT|file.md",
+      name: "file.md",
       attributes: {}
     }
     const rootFileTodos = [
@@ -64,7 +66,8 @@ describe("FolderTodoParser", () => {
         "projectAttribute": "projectValue",
         "project": "pj1"
       },
-      file: "ROOT|PROJECTS|Something|file2.md",
+      path: "ROOT|PROJECTS|Something|file2.md",
+      name: "file2.md",
       project: "pj1"
     }
     td.when(fakeFileParser.findTodos("file2", "ROOT|PROJECTS|Something|file2.md")).thenReturn(file2Todos)
@@ -106,12 +109,12 @@ describe("FolderTodoParser", () => {
       should(parsedFolder.attributeValues["assignee"]).containEql("Louis")
       should(parsedFolder.attributeValues["project"]).containEql("pj1")
     })
-    it("loads projects", () => {
-      const project = TestUtils.findObj(parsedFolder.projects, {
-        name: "pj1"
-      }) as Project
-      should(project).not.be.undefined()
-      should(project.files).deepEqual(["ROOT|PROJECTS|Something|file2.md"])
+    it("loads files", () => {
+      const file = TestUtils.findObj(parsedFolder.files, {
+        fileProperties: { name: "file2.md" }
+      }) as ParsedFile
+      should(file).not.be.undefined()
+      should(file.fileProperties.path).deepEqual("ROOT|PROJECTS|Something|file2.md")
     })
   })
 

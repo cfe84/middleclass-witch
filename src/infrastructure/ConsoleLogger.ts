@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 export class ConsoleLogger implements ILogger {
   private connection: vscode.OutputChannel
   constructor() {
-    this.connection = vscode.window.createOutputChannel("Extension: Proletarian Wizard")
+    this.connection = vscode.window.createOutputChannel("Extension: Middleclass Witch")
   }
   log(msg: string): void {
     this.connection.appendLine(`LOG:   ${msg}`)

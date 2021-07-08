@@ -25,9 +25,11 @@ export class FileParser {
   }
 
   getFileProperties(content: string, file: string): FileProperties {
+    const name = this.deps.path.basename(file)
     const res: FileProperties = {
       project: undefined,
-      file,
+      path: file,
+      name,
       attributes: {}
     }
     if (content.length < 3 || content.substr(0, 4) !== "---\n") {

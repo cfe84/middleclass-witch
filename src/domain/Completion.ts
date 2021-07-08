@@ -6,14 +6,14 @@ export class Completion {
   constructor(private deps: IDependencies, private context: IContext) { }
 
   private completeAttribute(beginning: string): string[] {
-    return this.context.parsedFolder.attributes.filter(attr => attr.startsWith(beginning))
+    return this.context.parsedFolder.attributes.filter((attr: string) => attr.startsWith(beginning))
   }
 
   private completeAttributeValue(attributeName: string, beginning: string): string[] {
     const values = this.context.parsedFolder.attributeValues[attributeName]
     if (!values)
       return []
-    return values.filter(value => value.startsWith(beginning))
+    return values.filter((value: string) => value.startsWith(beginning))
   }
 
   private findCurrentWordBeginning(content: string, position: number): string {

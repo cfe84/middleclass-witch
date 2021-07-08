@@ -20,9 +20,9 @@ export class SwitchSortByCommand implements ICommand<string | null> {
       new SortByMenuOption("By status", { sortByOption: SortByOption.status, sortDirection: SortByDirection.up }),
       new SortByMenuOption("By project", { sortByOption: SortByOption.project, sortDirection: SortByDirection.up })
     ].concat(this.context.parsedFolder.attributes
-      .filter(attributeName => attributeName !== "selected")
+      .filter((attributeName: string) => attributeName !== "selected")
       .map(
-        attribute => new SortByMenuOption(`By ${attribute}`, { sortByOption: SortByOption.attribute, attributeName: attribute, sortDirection: SortByDirection.up })
+        (attribute: string) => new SortByMenuOption(`By ${attribute}`, { sortByOption: SortByOption.attribute, attributeName: attribute, sortDirection: SortByDirection.up })
       ))
     const option = await vscode.window.showQuickPick(options, { canPickMany: false, placeHolder: "Sort by" })
     if (option) {

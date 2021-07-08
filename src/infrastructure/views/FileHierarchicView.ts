@@ -4,6 +4,7 @@ import { IDependencies } from '../../contract/IDependencies';
 import { TodoItem } from '../../domain/TodoItem';
 import { IDictionary } from '../../domain/IDictionary';
 import { Project } from '../../domain/Project';
+import { ParsedFile } from '../../domain/ParsedFile';
 
 enum ProjectItemType {
   Project,
@@ -13,9 +14,9 @@ enum ProjectItemType {
 abstract class GroupOrTodo extends vscode.TreeItem {
   abstract type: ProjectItemType;
 
-  public asProject(): ProjectItem {
+  public asProject(): GroupItem {
     if (this.type === ProjectItemType.Project)
-      return this as unknown as ProjectItem
+      return this as unknown as GroupItem
     throw (Error("Invalid cast (to project)"))
   }
 
@@ -26,19 +27,19 @@ abstract class GroupOrTodo extends vscode.TreeItem {
   }
 }
 
-class ProjectItem extends GroupOrTodo {
+class GroupItem extends GroupOrTodo {
   type: ProjectItemType = ProjectItemType.Project
-  constructor(public project: Project) {
-    super(project.name)
+  constructor(public attributeValue: string, public files: ParsedFile[]) {
+    super(attributeValue)
     this.collapsibleState = vscode.TreeItemCollapsibleState.Expanded
   }
-  filesAsTreeItems = () => this.project.files.map(file => new FileItem(file))
+  filesAsTreeItems = () => this.files.map(file => new FileItem(file))
 }
 
 class FileItem extends GroupOrTodo {
   type: ProjectItemType = ProjectItemType.File
-  constructor(private file: string) {
-    super(file)
+  constructor(private file: ParsedFile) {
+    super(file.fileProperties.name)
 
     const mapAttributeName = (attributeName: string): string =>
       attributeName === "selected" ? "📌"
@@ -56,10 +57,10 @@ class FileItem extends GroupOrTodo {
     this.command = {
       title: "Open",
       command: "mw.openFile",
-      arguments: [vscode.Uri.file(file)]
+      arguments: [vscode.Uri.file(file.fileProperties.path)]
     }
 
-    this.description = file//(file.fileProperties.file) + " " + flattenAttributes(file.fileProperties.attributes)
+    this.description = (file.fileProperties.name) + " " + flattenAttributes(file.fileProperties.attributes)
     this.collapsibleState = vscode.TreeItemCollapsibleState.None
   }
 }
@@ -131,69 +132,32 @@ export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
     return element.type === ProjectItemType.Project ? element.asProject() : element.asFile()
   }
 
-  private groomTodos(todos: TodoItem[]): TodoItem[] {
-    const directionMultiplier = this._sortBy.sortDirection === SortByDirection.up ? 1 : -1
-    switch (this._sortBy.sortByOption) {
-      case SortByOption.project:
-        todos = todos.sort((a, b) => (a.project && b.project) ? (a.project.localeCompare(b.project) * directionMultiplier) : directionMultiplier)
-        break
-      case SortByOption.attribute:
-      default:
-        if (!this._sortBy.attributeName)
-          break
-        const attributeName = this._sortBy.attributeName
-        const compare = (a: TodoItem, b: TodoItem) => {
-          if (!a.attributes || a.attributes[attributeName] === undefined) // a doesn't have attribute, it's smaller
-            return directionMultiplier
-          if (!b.attributes || b.attributes[attributeName] === undefined)
-            return -directionMultiplier
-          // a is true, or b is false, a is bigger
-          if (a.attributes[attributeName] === true || b.attributes[attributeName] === false)
-            return -directionMultiplier
-          if (a.attributes[attributeName] === false || b.attributes[attributeName] === true)
-            return directionMultiplier
-          return (a.attributes[attributeName] as string).localeCompare(b.attributes[attributeName] as string) * directionMultiplier
+  private getGroupsByAttribute(attributeName: string): GroupItem[] {
+    const res: IDictionary<ParsedFile[]> = {}
+    this.context.parsedFolder.files.forEach(
+      file => {
+        let value = `${file.fileProperties.attributes[attributeName]}`
+        if (!file.fileProperties.attributes[attributeName]) {
+          value = `(empty ${attributeName})`
         }
-        todos = todos.sort((a, b) => compare(a, b))
-
-    }
-    return todos
-  }
-
-  private getGroupsByProject(): ProjectItem[] {
-    const projects = this.context.parsedFolder.projects
-    return projects
-      .sort((a, b) => a.name === "Empty" ? 1 : a.name.localeCompare(b.name))
-      .map(project => new ProjectItem(project))
-  }
-
-  private getGroupsByAttribute(attributeName: string): ProjectItem[] {
-    // const todoWithoutThisAttribute = this.context.parsedFolder.todos.filter(todo => !todo.attributes || todo.attributes[attributeName] === undefined)
-    // let groupedByAttributes = this.context.parsedFolder.attributeValues[attributeName].map(
-    //   attributeValue => {
-    //     const todos = this.context.parsedFolder.todos.filter(todo => todo.attributes && todo.attributes[attributeName] === attributeValue)
-    //     return new ProjectItem(attributeValue)
-    //   })
-    // if (todoWithoutThisAttribute.length > 0) {
-    //   groupedByAttributes = groupedByAttributes.concat(new ProjectItem("Empty", this.groomTodos(todoWithoutThisAttribute)))
-    // }
-    // return groupedByAttributes
-    return []
-  }
-
-  private getNoGroups(): ProjectItem[] {
-    // return [new ProjectItem("All todos", this.groomTodos(this.context.parsedFolder.todos))]
-    return []
+        if (value) {
+          if (!res[value]) {
+            res[value] = []
+          }
+          res[value].push(file)
+        }
+      })
+    return Object.keys(res).map(attributeValue => new GroupItem(attributeValue, res[attributeValue]))
   }
 
   private getGroupByGroups() {
     switch (this._groupBy.groupByOption) {
-      case GroupByOption.project:
-        return this.getGroupsByProject()
-      case GroupByOption.attribute:
-        return this.getGroupsByAttribute(this._groupBy.attributeName as string)
+      // case GroupByOption.project:
+      //   return this.getGroupsByProject()
+      // case GroupByOption.attribute:
+      //   return this.getGroupsByAttribute(this._groupBy.attributeName as string)
       default:
-        return this.getNoGroups()
+        return this.getGroupsByAttribute("project")
     }
   }
 

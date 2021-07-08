@@ -120,7 +120,8 @@ idea is to bla`
     it("loads regular header", () => {
       should(normalFile.project).eql("Something")
       should(normalFile.attributes["attribute1"]).eql("Something else")
-      should(normalFile.file).eql("normal")
+      should(normalFile.path).eql("normal")
+      should(normalFile.name).eql("BASENAME(normal)")
     })
     it("works for no header", () => should(noHeaderFile.project).be.undefined())
     it("ignores second header", () => should(doubleHeaderFile.attributes["something"]).be.undefined())

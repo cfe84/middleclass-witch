@@ -34,6 +34,7 @@ import { OpenExternalDocument } from './commands/OpenExternalDocumentCommand'
 import { OpenFileCommand } from './commands/OpenFileCommand'
 import { ArchiveClickedProjectCommand } from './commands/ArchiveClickedProjectCommand'
 import { FileHierarchicView } from './views/FileHierarchicView'
+import { SwitchGroupFilesByCommand } from './commands/SwitchGroupFilesByCommand'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -59,7 +60,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 	const context: IContext = {
 		rootFolder,
 		config: config || undefined,
-		parsedFolder: { todos: [], attributes: [], attributeValues: {}, files: [] },
+		parsedFolder: { todos: [], attributes: [], attributeValues: {}, files: [], projectAttributes: [] },
 		storage: vscontext.globalState,
 		templatesFolder: deps.path.join(rootFolder, ".pw", "templates")
 	}
@@ -113,6 +114,9 @@ export function activate(vscontext: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider("mw.todoHierarchy", todosView)
 
 	const filesView = new FileHierarchicView(deps, context)
+	const cmd = new SwitchGroupFilesByCommand(deps, context, filesView)
+	let disposable = vscode.commands.registerCommand(cmd.Id, cmd.executeAsync);
+	vscontext.subscriptions.push(disposable);
 	vscode.window.registerTreeDataProvider("mw.filesHierarchy", filesView)
 
 	todoItemFsEventListener.fileDidChange.push(() => {

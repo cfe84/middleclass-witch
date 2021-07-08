@@ -114,6 +114,11 @@
 				"command": "mw.openExternalDocument",
 				"title": "Open With Default App",
 				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.filesView.groupFilesBy",
+				"title": "Group files by",
+				"category": "Middleclass Witch"
 			}
 		],
 		"keybindings": [
@@ -205,6 +210,11 @@
 				{
 					"command": "mw.todoView.sortBy",
 					"when": "view == mw.todoHierarchy",
+					"group": "navigation"
+				},
+				{
+					"command": "mw.filesView.groupFilesBy",
+					"when": "view == mw.filesHierarchy",
 					"group": "navigation"
 				}
 			]

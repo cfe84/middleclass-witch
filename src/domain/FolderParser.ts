@@ -6,7 +6,10 @@ import { FileParser } from "./FileParser";
 import { ParsedFile } from "./ParsedFile";
 import { ParsedFolder } from "./ParsedFolder";
 
-
+interface Attributes {
+  attributes: IDictionary<string[]>
+  projectAttributes: IDictionary<string[]>
+}
 
 export class FolderParser {
   constructor(private deps: IDependencies, private context: IContext, private fileParser: FileParser = new FileParser(deps)) {
@@ -56,13 +59,16 @@ export class FolderParser {
 
   public parseFolder(folder: string): ParsedFolder {
     const files = this.findFolderFiles(folder)
-    const attributes: IDictionary<string[]> = this.listAttributes(files);
+    const allAttributes = this.listAttributes(files);
+    const attributes: IDictionary<string[]> = allAttributes.attributes
+    const projectAttributes: IDictionary<string[]> = allAttributes.projectAttributes
     const todos = this.aggregateTodos(files)
     const parsedFolder: ParsedFolder = {
       todos,
       files,
       attributes: Object.keys(attributes).sort((a, b) => a.localeCompare(b)),
-      attributeValues: attributes
+      attributeValues: attributes,
+      projectAttributes: Object.keys(projectAttributes)
     }
     if (!attributes["project"]) {
       attributes["project"] = []
@@ -78,9 +84,10 @@ export class FolderParser {
     return parsedFolder
   }
 
-  private listAttributes(files: ParsedFile[]) {
+  private listAttributes(files: ParsedFile[]): Attributes {
     const attributes: IDictionary<string[]> = {};
-    const addAttributes = (todoAttributes: IDictionary<any>) => {
+    const projectAttributes: IDictionary<string[]> = {};
+    const addAttributes = (attributes: IDictionary<string[]>, todoAttributes: IDictionary<any>) => {
       Object.keys(todoAttributes).forEach(attribute => {
         if (!attributes[attribute]) {
           attributes[attribute] = [];
@@ -94,33 +101,18 @@ export class FolderParser {
     }
     files.forEach(file => {
       if (file.fileProperties?.attributes) {
-        addAttributes(file.fileProperties.attributes)
+        addAttributes(attributes, file.fileProperties.attributes)
+        addAttributes(projectAttributes, file.fileProperties.attributes)
       }
       file.todos.forEach(todo => {
         if (todo.attributes) {
-          addAttributes(todo.attributes)
+          addAttributes(attributes, todo.attributes)
         }
       })
     })
-    return attributes;
+    return {
+      attributes,
+      projectAttributes
+    };
   }
-
-  // private listProjects(files: ParsedFile[]): Project[] {
-  //   const projects: { [key: string]: string[] } = {}
-
-  //   files
-  //     .map(file => file.fileProperties)
-  //     .filter(project => project !== undefined)
-  //     .forEach(project => {
-  //       const name = project.project as string
-  //       if (!projects[name]) {
-  //         projects[name] = []
-  //       }
-  //       projects[name].push(project.path)
-  //     })
-  //   return Object.keys(projects).map(name => ({
-  //     name,
-  //     files: projects[name]
-  //   }))
-  // }
 }

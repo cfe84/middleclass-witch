@@ -36,10 +36,17 @@ class GroupItem extends GroupOrTodo {
   filesAsTreeItems = () => this.files.map(file => new FileItem(file))
 }
 
+function or(a: any, b: string) {
+  if (!a) {
+    return b
+  }
+  return `${a}`
+}
+
 class FileItem extends GroupOrTodo {
   type: ProjectItemType = ProjectItemType.File
   constructor(private file: ParsedFile) {
-    super(file.fileProperties.name)
+    super(or(file.fileProperties.attributes["title"], file.fileProperties.name))
 
     const mapAttributeName = (attributeName: string): string =>
       attributeName === "selected" ? "📌"
@@ -65,60 +72,20 @@ class FileItem extends GroupOrTodo {
   }
 }
 
-export enum GroupByOption {
-  project,
-  attribute
-}
-
-export interface GroupByConfig {
-  groupByOption: GroupByOption
-  attributeName?: string
-}
-
-export enum SortByOption {
-  project,
-  attribute
-}
-
-export enum SortByDirection {
-  up,
-  down
-}
-
-export interface SortByConfig {
-  sortByOption: SortByOption
-  sortDirection: SortByDirection
-  attributeName?: string
-}
-
-const STORAGEKEY_GROUPBY = "mw.projectView.groupBy"
-const STORAGEKEY_SORTBY = "mw.todoView.sortBy"
+const STORAGEKEY_GROUPBY = "mw.fileView.groupBy"
 
 export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> {
 
   constructor(private deps: IDependencies, private context: IContext) {
-    deps.logger.log(JSON.stringify(context.parsedFolder.files, null, 2))
-    this._groupBy = context.storage ? context.storage.get(STORAGEKEY_GROUPBY, { groupByOption: GroupByOption.project }) : { groupByOption: GroupByOption.project }
-    this._sortBy = context.storage ? context.storage.get(STORAGEKEY_SORTBY, { sortByOption: SortByOption.project, sortDirection: SortByDirection.up }) : { sortByOption: SortByOption.project, sortDirection: SortByDirection.up }
+    this._groupBy = context.storage ? context.storage.get(STORAGEKEY_GROUPBY, "project") : "project"
   }
 
-  private _groupBy: GroupByConfig
-  private _sortBy: SortByConfig
+  private _groupBy: string
 
-  public set groupBy(value: GroupByConfig) {
+  public set groupBy(value: string) {
     this._groupBy = value
     this.context.storage?.update(STORAGEKEY_GROUPBY, value)
     this.refresh()
-  }
-
-  public set sortBy(value: SortByConfig) {
-    this._sortBy = value
-    this.context.storage?.update(STORAGEKEY_SORTBY, value)
-    this.refresh()
-  }
-
-  public get sortBy(): SortByConfig {
-    return this._sortBy
   }
 
   private onDidChangeTreeDataEventEmitter: vscode.EventEmitter<GroupOrTodo | undefined> = new vscode.EventEmitter<GroupOrTodo | undefined>();
@@ -152,14 +119,7 @@ export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
   }
 
   private getGroupByGroups() {
-    switch (this._groupBy.groupByOption) {
-      // case GroupByOption.project:
-      //   return this.getGroupsByProject()
-      // case GroupByOption.attribute:
-      //   return this.getGroupsByAttribute(this._groupBy.attributeName as string)
-      default:
-        return this.getGroupsByAttribute("project")
-    }
+    return this.getGroupsByAttribute(this._groupBy)
   }
 
   async getChildren(element?: GroupOrTodo | undefined): Promise<GroupOrTodo[]> {

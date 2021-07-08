@@ -105,6 +105,12 @@ describe("FolderTodoParser", () => {
       should(parsedFolder.attributeValues["project"]).length(3)
       should(parsedFolder.attributeValues["project"]).containEql("Something")
     })
+    it("loads projectAttributes", () => {
+      should(parsedFolder.projectAttributes).containEql("project")
+      should(parsedFolder.projectAttributes).containEql("projectAttribute")
+      should(parsedFolder.projectAttributes).containEql("assignee")
+      should(parsedFolder.projectAttributes).not.containEql("booleanAttribute")
+    })
     it("adds attributes from file header", () => {
       should(parsedFolder.attributeValues["assignee"]).containEql("Louis")
       should(parsedFolder.attributeValues["project"]).containEql("pj1")

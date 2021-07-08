@@ -97,6 +97,7 @@ const STORAGEKEY_SORTBY = "mw.todoView.sortBy"
 export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> {
 
   constructor(private deps: IDependencies, private context: IContext) {
+    deps.logger.log(JSON.stringify(context.parsedFolder.files, null, 2))
     this._groupBy = context.storage ? context.storage.get(STORAGEKEY_GROUPBY, { groupByOption: GroupByOption.project }) : { groupByOption: GroupByOption.project }
     this._sortBy = context.storage ? context.storage.get(STORAGEKEY_SORTBY, { sortByOption: SortByOption.project, sortDirection: SortByDirection.up }) : { sortByOption: SortByOption.project, sortDirection: SortByDirection.up }
   }

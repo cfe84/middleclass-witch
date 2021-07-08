@@ -1,5 +1,4 @@
 import { IDependencies } from "../contract/IDependencies"
-import { FileInspector } from "./FileInspector"
 import { FileProperties } from "./FileProperties"
 import { LineOperations } from "./LineOperations"
 import { TodoItem } from "./TodoItem"
@@ -26,20 +25,22 @@ export class FileParser {
 
   getFileProperties(content: string, file: string): FileProperties {
     const name = this.deps.path.basename(file)
+    const eol = content.indexOf("\r") < 0 ? "\n" : "\r\n"
+    const marker = `---${eol}`
     const res: FileProperties = {
       project: undefined,
       path: file,
       name,
       attributes: {}
     }
-    if (content.length < 3 || content.substr(0, 4) !== "---\n") {
+    if (content.length < 3 || (content.substr(0, marker.length) !== marker)) {
       return res
     }
-    const headerEnd = content.indexOf("---", 4)
+    const headerEnd = content.indexOf("---", marker.length)
     if (headerEnd < 0) {
       return res
     }
-    const header = content.substr(4, headerEnd - 4)
+    const header = content.substr(marker.length, headerEnd - marker.length)
     const parsedHeader = yaml.parse(header)
     if (parsedHeader.project) {
       res.project = `${parsedHeader.project}`

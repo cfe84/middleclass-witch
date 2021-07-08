@@ -107,6 +107,7 @@ project: something
 
 idea is to bla`
     const emptyFileContent = ""
+    const crlfFileContent = `---\r\nproject: Something\r\nattribute1: Something else\r\n---\r\nMy my`
 
     // when
     const normalFile = parser.getFileProperties(normalFileContent, "normal")
@@ -115,6 +116,7 @@ idea is to bla`
     const noProjectFile = parser.getFileProperties(noProjectFileContent, "")
     const unclosedHeader = parser.getFileProperties(unclosedHeaderContent, "")
     const emptyFile = parser.getFileProperties(emptyFileContent, "")
+    const crlfFile = parser.getFileProperties(crlfFileContent, "")
 
     // then
     it("loads regular header", () => {
@@ -131,6 +133,7 @@ idea is to bla`
     })
     it("ignores header if not closed", () => should(unclosedHeader.project).be.undefined())
     it("ignores empty file", () => should(emptyFile.project).be.undefined())
+    it("parses CRLF files", () => should(crlfFile.project).be.eql("Something"))
 
   })
 })

@@ -46,13 +46,11 @@ Some text
       status: TodoStatus.Todo,
       text: "A todo todo",
       file,
-      project: projectName,
       line: aTodoTodoLn
     }))
     it("should load a todo with a project", () => containsTodo(
       {
         text: "a todo with",
-        project: "this project",
         attributes: { "project": "this project" },
       }))
     it("should load completed todo", () => containsTodo(
@@ -60,14 +58,12 @@ Some text
         status: TodoStatus.Complete,
         text: "a completed todo",
         file: file,
-        project: projectName,
         attributes: { assignee: "Pete", booleanAttribute: true },
         line: aCompletedTodoLn
       }))
     it("should load delegated todo", () => containsTodo({
       status: TodoStatus.Delegated,
       text: "a delegated todo", file,
-      project: projectName,
       attributes: { assignee: "Leah", anotherBooleanAttr: true },
       line: aDelegatedTodoLn
     }))
@@ -75,7 +71,6 @@ Some text
       status: TodoStatus.InProgress,
       text: "An in progress todo",
       file,
-      project: projectName,
       attributes: {},
       line: anInProgressTodo
     }))
@@ -120,20 +115,17 @@ idea is to bla`
 
     // then
     it("loads regular header", () => {
-      should(normalFile.project).eql("Something")
       should(normalFile.attributes["attribute1"]).eql("Something else")
       should(normalFile.path).eql("normal")
       should(normalFile.name).eql("BASENAME(normal)")
     })
-    it("works for no header", () => should(noHeaderFile.project).be.undefined())
+    it("works for no header", () => should(noHeaderFile.attributes).deepEqual({}))
     it("ignores second header", () => should(doubleHeaderFile.attributes["something"]).be.undefined())
     it("handles header with no project", () => {
-      should(noProjectFile.project).be.undefined()
       should(noProjectFile.attributes["something"]).eql(123)
     })
-    it("ignores header if not closed", () => should(unclosedHeader.project).be.undefined())
-    it("ignores empty file", () => should(emptyFile.project).be.undefined())
-    it("parses CRLF files", () => should(crlfFile.project).be.eql("Something"))
-
+    it("ignores header if not closed", () => should(unclosedHeader.attributes).deepEqual({}))
+    it("ignores empty file", () => should(emptyFile.attributes).deepEqual({}))
+    it("parses CRLF files", () => should(crlfFile.attributes.project).be.eql("Something"))
   })
 })

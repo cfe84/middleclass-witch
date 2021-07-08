@@ -13,8 +13,6 @@ export interface TodoItem {
   status: TodoStatus
   text: string
   file: string
-  folderType?: string
-  project?: string
-  attributes?: IDictionary<string | boolean>
+  attributes: IDictionary<string | boolean>
   line?: number
 }

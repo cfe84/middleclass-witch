@@ -12,13 +12,12 @@ import { Project } from "../src/domain/Project"
 import { ParsedFile } from "../src/domain/ParsedFile"
 const ctx: IContext = fakeContext()
 describe("FolderTodoParser", () => {
-  const makeTodo = (attributes: { [key: string]: string | boolean }, project: string = ""): TodoItem => {
+  const makeTodo = (attributes: { [key: string]: string | boolean }): TodoItem => {
     return {
       file: "",
       status: TodoStatus.InProgress,
       text: '',
       attributes,
-      project
     }
   }
   context("Hierarchy", () => {
@@ -39,14 +38,13 @@ describe("FolderTodoParser", () => {
     td.when(deps.fs.lstatSync("ROOT|file.md")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.readFileSync("ROOT|file.md")).thenReturn(Buffer.from(`root`))
     const rootFileProperties: FileProperties = {
-      project: undefined,
       path: "ROOT|file.md",
       name: "file.md",
       attributes: {}
     }
     const rootFileTodos = [
       makeTodo({ "assignee": "Pete", "project": "this project" }),
-      makeTodo({ "anotherBooleanAttr": false }, "Something")
+      makeTodo({ "anotherBooleanAttr": false })
     ]
     td.when(fakeFileParser.findTodos("root", "ROOT|file.md")).thenReturn(rootFileTodos)
     td.when(fakeFileParser.getFileProperties("root", "ROOT|file.md")).thenReturn(rootFileProperties)
@@ -58,7 +56,8 @@ describe("FolderTodoParser", () => {
     td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something|file2.md")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.readFileSync("ROOT|PROJECTS|Something|file2.md")).thenReturn(Buffer.from(`file2`))
     const file2Todos = [
-      makeTodo({ "assignee": "Leah", "booleanAttribute": true })
+      makeTodo({ "assignee": "Leah", "booleanAttribute": true }),
+      makeTodo({ "project": "Something" })
     ]
     const file2Properties: FileProperties = {
       attributes: {
@@ -68,7 +67,6 @@ describe("FolderTodoParser", () => {
       },
       path: "ROOT|PROJECTS|Something|file2.md",
       name: "file2.md",
-      project: "pj1"
     }
     td.when(fakeFileParser.findTodos("file2", "ROOT|PROJECTS|Something|file2.md")).thenReturn(file2Todos)
     td.when(fakeFileParser.getFileProperties("file2", "ROOT|PROJECTS|Something|file2.md")).thenReturn(file2Properties)
@@ -121,6 +119,10 @@ describe("FolderTodoParser", () => {
       }) as ParsedFile
       should(file).not.be.undefined()
       should(file.fileProperties.path).deepEqual("ROOT|PROJECTS|Something|file2.md")
+    })
+    it("replicates attributes from file to todo", () => {
+      const todo = TestUtils.findObj(parsedFolder.todos, { attributes: { project: "Something" } }) as TodoItem
+      should(todo.attributes["projectAttribute"]).eql("projectValue")
     })
   })
 

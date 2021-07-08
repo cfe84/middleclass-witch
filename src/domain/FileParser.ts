@@ -18,7 +18,6 @@ export class FileParser {
       .filter(todo => todo !== null) as TodoItem[]
     todos.forEach(todo => {
       todo.file = file
-      todo.project = (todo.attributes && todo.attributes.project) ? todo.attributes.project as string : ""
     })
     return todos
   }
@@ -28,7 +27,6 @@ export class FileParser {
     const eol = content.indexOf("\r") < 0 ? "\n" : "\r\n"
     const marker = `---${eol}`
     const res: FileProperties = {
-      project: undefined,
       path: file,
       name,
       attributes: {}
@@ -42,9 +40,6 @@ export class FileParser {
     }
     const header = content.substr(marker.length, headerEnd - marker.length)
     const parsedHeader = yaml.parse(header)
-    if (parsedHeader.project) {
-      res.project = `${parsedHeader.project}`
-    }
     res.attributes = parsedHeader
     return res
   }

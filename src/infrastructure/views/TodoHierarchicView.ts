@@ -87,7 +87,7 @@ class TodoTreeItem extends GroupOrTodo {
       arguments: [vscode.Uri.file(todo.file), todo.line]
     }
 
-    this.description = (todo.project || todo.file) + " " + flattenAttributes(todo.attributes)
+    this.description = (todo.file) + " " + flattenAttributes(todo.attributes)
     this.collapsibleState = vscode.TreeItemCollapsibleState.None
   }
 }
@@ -134,7 +134,6 @@ export class TodoHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
 
   constructor(private deps: IDependencies, private context: IContext) {
     this._showSelectedOnTop = context.storage ? context.storage.get(STORAGEKEY_SHOWSELECTEDONTOP, true) : true
-    this._showProjectsOnTop = context.storage ? context.storage.get(STORAGEKEY_SHOWPROJECTSONTOP, true) : true
     this._showOverdueOnTop = context.storage ? context.storage.get(STORAGEKEY_SHOWOVERDUEONTOP, true) : true
     this._showCompleted = context.storage ? context.storage.get(STORAGEKEY_SHOWCOMPLETED, true) : true
     this._showCanceled = context.storage ? context.storage.get(STORAGEKEY_SHOWCANCELED, true) : true
@@ -146,7 +145,6 @@ export class TodoHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
   private _groupBy: GroupByConfig
   private _sortBy: SortByConfig
   private _showSelectedOnTop: boolean
-  private _showProjectsOnTop: boolean
   private _showOverdueOnTop: boolean
   private _showCompleted: boolean
   private _showCanceled: boolean
@@ -175,14 +173,6 @@ export class TodoHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
   }
   public get showSelectedOnTop(): boolean {
     return this._showSelectedOnTop
-  }
-  public set showProjectsOnTop(value: boolean) {
-    this._showProjectsOnTop = value
-    this.context.storage?.update(STORAGEKEY_SHOWPROJECTSONTOP, value)
-    this.refresh()
-  }
-  public get showProjectsOnTop(): boolean {
-    return this._showProjectsOnTop
   }
   public set showOverdueOnTop(value: boolean) {
     this._showOverdueOnTop = value
@@ -252,9 +242,6 @@ export class TodoHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
       case SortByOption.status:
         todos = todos.sort((a, b) => (a.status - b.status) * directionMultiplier)
         break
-      case SortByOption.project:
-        todos = todos.sort((a, b) => (a.project && b.project) ? (a.project.localeCompare(b.project) * directionMultiplier) : directionMultiplier)
-        break
       case SortByOption.attribute:
       default:
         if (!this._sortBy.attributeName)
@@ -289,25 +276,6 @@ export class TodoHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
     return new Group("Selected tasks", this.groomTodos(getSelectedTasks()))
   }
 
-  private getProjectsGroup(): Group {
-    const projectsFolder = this.deps.path.join(this.context.rootFolder, this.context.config.folders.current || "")
-    let projects: string[] = []
-    const fileInspector = new FileInspector(this.deps, this.context)
-    if (this.deps.fs.existsSync(projectsFolder))
-      projects = this.deps.fs.readdirSync(projectsFolder)
-    return new Group("Projects", projects.map(project => {
-      const prj = fileInspector.inspectProject(project)
-      return {
-        file: this.deps.path.join(projectsFolder, project),
-        status: TodoStatus.Todo,
-        text: prj.projectName,
-        attributes: {
-          when: prj.date || ""
-        }
-      }
-    }))
-  }
-
   private getOverdueGroup(): Group {
     const dueDateAttributes = ["due", "duedate", "when", "expire", "expires"]
     const now = Date.now()
@@ -337,25 +305,6 @@ export class TodoHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
       .filter((group) => group.todos.length > 0)
   }
 
-  private getGroupsByProject(): Group[] {
-    const getProjects = () =>
-      this.context.parsedFolder.todos.reduce((projects: IDictionary<TodoItem[]>, todo: TodoItem) => {
-        const project = todo.project || "Empty"
-        if (!projects[project]) {
-          projects[project] = []
-        }
-        projects[project].push(todo)
-        return projects
-      }, {})
-    const projects = getProjects()
-    Object.keys(projects).forEach(key => {
-      projects[key] = this.groomTodos(projects[key])
-    })
-    return Object.keys(projects)
-      .map(project => new Group(project, projects[project]))
-      .sort((a, b) => a.name === "Empty" ? 1 : a.name.localeCompare(b.name))
-  }
-
   private getGroupsByAttribute(attributeName: string): Group[] {
     const todoWithoutThisAttribute = this.context.parsedFolder.todos.filter(todo => !todo.attributes || todo.attributes[attributeName] === undefined)
     let groupedByAttributes = this.context.parsedFolder.attributeValues[attributeName].map(
@@ -375,8 +324,6 @@ export class TodoHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
 
   private getGroupByGroups() {
     switch (this._groupBy.groupByOption) {
-      case GroupByOption.project:
-        return this.getGroupsByProject()
       case GroupByOption.attribute:
         return this.getGroupsByAttribute(this._groupBy.attributeName as string)
       case GroupByOption.status:
@@ -401,8 +348,6 @@ export class TodoHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
     let groups = this.getGroupByGroups()
     if (!this.showEmpty)
       groups = this.filterEmptyGroups(groups)
-    if (this.showProjectsOnTop)
-      groups = [this.getProjectsGroup()].concat(groups)
     if (this._showOverdueOnTop)
       groups = [this.getOverdueGroup()].concat(groups)
     if (this._showSelectedOnTop)

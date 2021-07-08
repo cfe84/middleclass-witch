@@ -22,6 +22,13 @@ export class FolderParser {
     const content = `${this.deps.fs.readFileSync(file)}`
     const todos = this.fileParser.findTodos(content, file)
     const fileProperties = this.fileParser.getFileProperties(content, file)
+    todos.forEach(todo => {
+      Object.keys(fileProperties.attributes).forEach(attribute => {
+        if (todo.attributes[attribute] === undefined) {
+          todo.attributes[attribute] = fileProperties.attributes[attribute] as string
+        }
+      })
+    })
     return {
       todos,
       fileProperties
@@ -76,11 +83,6 @@ export class FolderParser {
     if (!attributes["selected"]) {
       attributes["selected"] = []
     }
-    todos.forEach(todo => {
-      if (todo.project !== undefined && todo.project !== "" && !attributes["project"].find(value => value === todo.project)) {
-        attributes["project"].push(todo.project)
-      }
-    })
     return parsedFolder
   }
 

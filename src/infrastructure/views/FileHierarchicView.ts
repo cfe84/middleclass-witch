@@ -104,6 +104,9 @@ export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
     const res: IDictionary<ParsedFile[]> = {}
     this.context.parsedFolder.files.forEach(
       file => {
+        if (!file.fileProperties || !file.fileProperties.attributes) {
+          return
+        }
         let value = `${file.fileProperties.attributes[attributeName]}`
         if (!file.fileProperties.attributes[attributeName]) {
           value = `(empty ${attributeName})`

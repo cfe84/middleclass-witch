@@ -27,7 +27,7 @@ export class Completion {
     return content.substr(beginning, position - beginning)
   }
 
-  complete(content: string, position: number): string[] {
+  completeTodo(content: string, position: number): string[] {
     const currentWordBeginning = this.findCurrentWordBeginning(content, position)
     if (currentWordBeginning === "") {
       return []
@@ -39,5 +39,32 @@ export class Completion {
       return this.completeAttributeValue(attributeName, valueBeginning)
     }
     return this.completeAttribute(currentWordBeginning.substr(1, currentWordBeginning.length - 1))
+  }
+
+  completeHeader(content: string, position: number): string[] {
+    const valueBeginningIndex = content.indexOf(":")
+    if (valueBeginningIndex >= 0 && valueBeginningIndex < position) {
+      const attributeName = content.substr(0, valueBeginningIndex).trim() // ignore :
+      const valueBeginning = content.substr(valueBeginningIndex + 1, position - valueBeginningIndex - 1).trimLeft()
+      return this.completeAttributeValue(attributeName, valueBeginning)
+    }
+    return this.completeAttribute(content.substr(0, position).trim())
+  }
+
+  public isInHeader(content: string, lineNumber: number): boolean {
+    const eol = content.indexOf("\r") >= 0 ? "\r\n" : "\n"
+    const headerStart = content.indexOf(`---`)
+    if (headerStart !== 0) {
+      return false
+    }
+    let lineCount = -1
+    let index = headerStart + eol.length
+    let newIndex = index
+    while ((newIndex = content.indexOf(eol, index)) > 0 && content.substr(index + eol.length, 3) !== "---") {
+      index = newIndex + eol.length
+      lineCount++
+    }
+    console.log(lineCount)
+    return lineNumber <= lineCount
   }
 }

@@ -3,7 +3,7 @@ import { IDependencies } from "../../contract/IDependencies";
 import { IContext } from "../../contract/IContext";
 import { Completion } from "../../domain/Completion";
 
-export const AttributeCompletionTriggerCharacters = ["@", "("]
+export const AttributeCompletionTriggerCharacters = ["@", "(", ":"]
 
 export class AttributeCompletionItemProvider implements vscode.CompletionItemProvider {
   private completion: Completion
@@ -11,7 +11,12 @@ export class AttributeCompletionItemProvider implements vscode.CompletionItemPro
     this.completion = new Completion(deps, context)
   }
   provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem>> {
-    return this.completion.complete(document.lineAt(position.line).text, position.character).map(proposition => ({ label: proposition }))
+    const isInHeader = this.completion.isInHeader(document.getText(), position.line)
+    const recommendations = isInHeader
+      ? this.completion.completeHeader(document.lineAt(position.line).text, position.character)
+      : this.completion.completeTodo(document.lineAt(position.line).text, position.character)
+
+    return recommendations.map(proposition => ({ label: proposition }))
   }
 
 }

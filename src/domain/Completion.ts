@@ -16,19 +16,39 @@ export class Completion {
     return values.filter((value: string) => value.startsWith(beginning))
   }
 
-  private findCurrentWordBeginning(content: string, position: number): string {
+  private findTodoAttributeCurrentWordBeginning(content: string, position: number): string {
     let beginning = position
-    while (beginning > 0 && content[beginning] !== "@" && content[beginning] !== "\n") {
+    const isBeginningOfFile = (pos: number) => pos <= 0
+    const isAttributeMarker = (pos: number) => content[pos] === "@"
+    const isNewLine = (pos: number) => content[pos] === "\n"
+    while (!isBeginningOfFile(beginning) && !isAttributeMarker(beginning) && !isNewLine(beginning)) {
       beginning--
     }
-    if (beginning <= 1 || content[beginning] !== "@" || content[beginning - 1] !== " ") {
+
+    const isAfterSpace = (pos: number) => content[pos - 1] === " "
+    if (beginning <= 1 || !isAttributeMarker(beginning) || !isAfterSpace(beginning)) {
       return ""
     }
     return content.substr(beginning, position - beginning)
   }
 
-  complete(content: string, position: number): string[] {
-    const currentWordBeginning = this.findCurrentWordBeginning(content, position)
+  completeTodoAttribute(content: string, position: number): string[] {
+    const currentWordBeginning = this.findTodoAttributeCurrentWordBeginning(content, position)
+    if (currentWordBeginning === "") {
+      return []
+    }
+    const valueBeginningIndex = currentWordBeginning.indexOf("(")
+    if (valueBeginningIndex >= 0) {
+      const attributeName = currentWordBeginning.substr(1, valueBeginningIndex - 1) // ignore @
+      const valueBeginning = currentWordBeginning.substr(valueBeginningIndex + 1, currentWordBeginning.length - valueBeginningIndex - 1)
+      return this.completeAttributeValue(attributeName, valueBeginning)
+    }
+    return this.completeAttribute(currentWordBeginning.substr(1, currentWordBeginning.length - 1))
+  }
+
+
+  completeFileAttribute(content: string, position: number): string[] {
+    const currentWordBeginning = this.findTodoAttributeCurrentWordBeginning(content, position)
     if (currentWordBeginning === "") {
       return []
     }

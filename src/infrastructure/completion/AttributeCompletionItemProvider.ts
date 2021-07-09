@@ -11,7 +11,7 @@ export class AttributeCompletionItemProvider implements vscode.CompletionItemPro
     this.completion = new Completion(deps, context)
   }
   provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem>> {
-    return this.completion.complete(document.lineAt(position.line).text, position.character).map(proposition => ({ label: proposition }))
+    return this.completion.completeTodoAttribute(document.lineAt(position.line).text, position.character).map(proposition => ({ label: proposition }))
   }
 
 }

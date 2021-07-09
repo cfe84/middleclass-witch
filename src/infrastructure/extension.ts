@@ -93,7 +93,8 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		vscode.workspace.onDidCreateFiles(event => todoItemFsEventListener.onFileCreated(event)),
 		vscode.workspace.onDidDeleteFiles(event => todoItemFsEventListener.onFileDeleted(event))
 	)
-	context.parsedFolder = folderParser.parseFolder(context.rootFolder)
+	const currentFolder = deps.path.join(context.rootFolder, context.config.folders.current)
+	context.parsedFolder = folderParser.parseFolder(currentFolder)
 
 	const todosView = new TodoHierarchicView(deps, context)
 	const viewCommands = [

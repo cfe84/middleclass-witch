@@ -3,7 +3,6 @@ import { IContext } from '../../contract/IContext';
 import { IDependencies } from '../../contract/IDependencies';
 import { TodoItem, TodoStatus } from '../../domain/TodoItem';
 import { IDictionary } from '../../domain/IDictionary';
-import { FileInspector } from '../../domain/FileInspector';
 
 enum ItemType {
   Group,

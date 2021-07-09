@@ -11,7 +11,7 @@ function makeFakeLogger(): ILogger {
 }
 
 function makeFakeDate(): IDate {
-  return td.object(["todayAsYMDString", "thisYearAsYString"])
+  return td.object(["todayAsYMDString", "thisYearAsYString", "nowAsYMDString"])
 }
 
 function makeFakeFs(): IFs {

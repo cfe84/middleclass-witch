@@ -67,7 +67,7 @@ class FileItem extends GroupOrTodo {
       arguments: [vscode.Uri.file(file.fileProperties.path)]
     }
 
-    this.description = (file.fileProperties.name) + " " + flattenAttributes(file.fileProperties.attributes)
+    this.description = flattenAttributes(file.fileProperties.attributes) + " || " + file.fileProperties.path
     this.collapsibleState = vscode.TreeItemCollapsibleState.None
   }
 }

@@ -46,6 +46,11 @@
 				"category": "Middleclass Witch"
 			},
 			{
+				"command": "mw.createNote",
+				"title": "Create Note",
+				"category": "Middleclass Witch"
+			},
+			{
 				"command": "mw.createRecurrence",
 				"title": "Create Recurrence",
 				"category": "Middleclass Witch"

@@ -20,13 +20,13 @@ export class ArchiveClickedProjectCommand implements ICommand<string | null> {
   executeAsync = async (file: File): Promise<string | null> => {
     this.deps.logger.log(`Open ${file.fsPath}`)
     const folderSelector = new FolderSelector({ allowThisFolder: true }, this.deps, this.context);
-    const projectFolder = this.deps.path.resolve(folderSelector.getSpecialFolder("Project"))
+    const currentFolder = this.deps.path.resolve(folderSelector.getSpecialFolder("current"))
     const parentFolder = this.deps.path.resolve(this.deps.path.dirname(file.fsPath))
-    if (this.deps.path.resolve(parentFolder) !== this.deps.path.resolve(projectFolder)) {
-      vscode.window.showErrorMessage(`Not a project (${parentFolder} vs ${projectFolder})`)
+    if (this.deps.path.resolve(parentFolder) !== this.deps.path.resolve(currentFolder)) {
+      vscode.window.showErrorMessage(`Not a project (${parentFolder} vs ${currentFolder})`)
       return null
     }
-    const archiveFolder = folderSelector.getSpecialFolder("Archive")
+    const archiveFolder = folderSelector.getSpecialFolder("archive")
     const yearlyFolder = this.deps.path.join(archiveFolder, this.deps.date.thisYearAsYString())
     const projectFolderName = this.deps.path.basename(file.fsPath)
 

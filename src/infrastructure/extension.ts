@@ -1,7 +1,6 @@
 import * as vscode from 'vscode'
 import * as fs from "fs"
 import * as path from "path"
-import { SaveFileCommand } from './commands/SaveFileCommand'
 import { ConsoleLogger } from './ConsoleLogger'
 import { StdDate } from './StdDate'
 import { VSUiSelector } from './selectors/VSUiSelector'
@@ -10,11 +9,8 @@ import { IContext } from '../contract/IContext'
 import { SelectFileCommand } from './commands/SelectFileCommand'
 import { ICommand } from './commands/ICommand'
 import { ArchiveProjectCommand } from './commands/ArchiveProjectCommand'
-import { CreateProjectCommand } from './commands/CreateProjectCommand'
 import { CreateNoteFromTemplate } from './commands/CreateNoteFromTemplate'
 import { ConfigFileLoader } from '../domain/ConfigFileLoader'
-import { CreateRecurrenceCommand } from './commands/CreateRecurrenceCommand'
-import { CreateReferenceFolderCommand } from './commands/CreateReferenceFolderCommand'
 import { AddDateToLineCommand } from './commands/AddDateToLineCommand'
 import { ToggleTodoCommand } from './commands/ToggleTodoCommand'
 import { MarkTodoAsCancelledCommand } from './commands/MarkTodoAsCancelledCommand'
@@ -35,6 +31,7 @@ import { OpenFileCommand } from './commands/OpenFileCommand'
 import { ArchiveClickedProjectCommand } from './commands/ArchiveClickedProjectCommand'
 import { FileHierarchicView } from './views/FileHierarchicView'
 import { SwitchGroupFilesByCommand } from './commands/SwitchGroupFilesByCommand'
+import { CreateNoteCommand } from './commands/createNoteCommand'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -53,7 +50,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		return null
 	}
 	const rootFolder = vscode.workspace.workspaceFolders[0].uri.fsPath
-	const configFile = deps.path.join(rootFolder, ".pw", "config.yml")
+	const configFile = deps.path.join(rootFolder, ".mw", "config.yml")
 	const configLoader = new ConfigFileLoader(deps)
 	const config = configLoader.loadConfig(configFile)
 
@@ -62,18 +59,15 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		config: config || undefined,
 		parsedFolder: { todos: [], attributes: [], attributeValues: {}, files: [], projectAttributes: [] },
 		storage: vscontext.globalState,
-		templatesFolder: deps.path.join(rootFolder, ".pw", "templates")
+		templatesFolder: deps.path.join(rootFolder, ".mw", "templates")
 	}
 
 	const commands: ICommand<string | null>[] = [
-		new SaveFileCommand(deps, context),
 		new SelectFileCommand(deps, context),
 		new ArchiveProjectCommand(deps, context),
 		new ArchiveClickedProjectCommand(deps, context),
-		new CreateProjectCommand(deps, context),
-		new CreateRecurrenceCommand(deps, context),
-		new CreateReferenceFolderCommand(deps, context),
 		new CreateNoteFromTemplate(deps, context),
+		new CreateNoteCommand(deps, context),
 		new AddDateToLineCommand(deps, context),
 		new ToggleTodoCommand(deps, context),
 		new MarkTodoAsCancelledCommand(deps, context),

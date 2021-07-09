@@ -5,14 +5,14 @@ import { IContext } from '../../contract/IContext';
 import { TemplateSelector } from '../../domain/TemplateSelector';
 import { TemplateProcessor } from '../../domain/TemplateProcessor';
 import { IDictionary } from '../../domain/IDictionary';
-import { FileSaveSelector } from '../selectors/FileSaveSelector';
+import { CreateNoteSubcommand } from './CreateNoteSubcommand';
 
 export class CreateNoteFromTemplate implements ICommand<string | null> {
   private templateSelector: TemplateSelector
-  private fileSaveSelector: FileSaveSelector
-  constructor(private deps: IDependencies, context: IContext) {
+  private createNoteSubcommand: CreateNoteSubcommand
+  constructor(private deps: IDependencies, private context: IContext) {
     this.templateSelector = new TemplateSelector(deps, context)
-    this.fileSaveSelector = new FileSaveSelector(deps, context)
+    this.createNoteSubcommand = new CreateNoteSubcommand(deps, context)
   }
   get Id(): string { return "mw.createNoteFromTemplate" }
 
@@ -39,10 +39,6 @@ export class CreateNoteFromTemplate implements ICommand<string | null> {
   }
 
   executeAsync = async (): Promise<string | null> => {
-    const path = await this.fileSaveSelector.selectFileDestinationAsync()
-    if (!path) {
-      return null
-    }
     const template = await this.templateSelector.selectTemplateAsync()
     if (!template) {
       return null
@@ -53,9 +49,6 @@ export class CreateNoteFromTemplate implements ICommand<string | null> {
     if (substitutedContent === null) {
       return null
     }
-    this.deps.fs.writeFileSync(path, substitutedContent)
-    const uri = vscode.Uri.file(path);
-    const editor = await vscode.window.showTextDocument(uri);
-    return template.path
+    return await this.createNoteSubcommand.executeAsync(substitutedContent)
   }
 }

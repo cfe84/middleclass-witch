@@ -5,4 +5,4 @@ export interface IFolder {
   isSpecialFolder: boolean
 }
 
-export type SpecialFolder = "Inbox" | "Project" | "Recurrence" | "Reference" | "Archive";
+export type SpecialFolder = "current" | "archive";

@@ -10,19 +10,19 @@ export class ArchiveProjectCommand implements ICommand<string | null> {
   }
   executeAsync = async (): Promise<string | null> => {
     const folderSelector = new FolderSelector({ allowThisFolder: true }, this.deps, this.context);
-    let projectFolder = await folderSelector.selectFolderAsync("Project")
-    if (!projectFolder) {
+    let currentFolder = await folderSelector.selectFolderAsync("current")
+    if (!currentFolder) {
       return null
     }
-    let objectToArchive: string | null = projectFolder.path
-    if (projectFolder.isSpecialFolder) {
+    let objectToArchive: string | null = currentFolder.path
+    if (currentFolder.isSpecialFolder) {
       const fileSelector = new FileSelector(this.deps)
-      objectToArchive = await fileSelector.selectFileAsync(projectFolder.path)
+      objectToArchive = await fileSelector.selectFileAsync(currentFolder.path)
     }
     if (!objectToArchive) {
       return null
     }
-    const archiveFolder = folderSelector.getSpecialFolder("Archive")
+    const archiveFolder = folderSelector.getSpecialFolder("archive")
     const yearlyFolder = this.deps.path.join(archiveFolder, this.deps.date.thisYearAsYString())
     const projectFolderName = this.deps.path.basename(objectToArchive)
     const destination = this.deps.path.join(yearlyFolder, projectFolderName)

@@ -72,13 +72,14 @@ PW comes with a handy view that lists all todos in the current hierarchy. This v
 
 ## Features
 
-1. [ ] Parse folder
-2. [ ] Project view
+1. [x] Parse folder
+2. [x] Project view
 3. [ ] Header autocomplete
-4. [ ] Create note in project
-5. [ ] Handle project files
-6. [ ] Consolidate projects
-7. [ ] Archive projects
+4. [ ] Quick create note
+5. [ ] Handle attribute files
+6. [ ] Consolidate attributes
+7. [ ] Archive attributes
+8. [ ] Limit the folders being parsed to current
 
 ## Known Issues
 

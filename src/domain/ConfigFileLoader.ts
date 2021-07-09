@@ -7,11 +7,8 @@ interface IConfigFile {
   config: IConfig
 }
 
-const defaultInboxFolder: string = "10 - Inbox"
-const defaultProjectsFolder: string = "20 - Current Projects"
-const defaultRecurrenceFolder: string = "21 - Recurrence"
-const defaultReferenceFolder: string = "30 - Reference"
-const defaultArchiveFolder: string = "40 - Archived Projects"
+const defaultProjectsFolder: string = "current"
+const defaultArchiveFolder: string = "archived"
 
 export class ConfigFileLoader {
   constructor(private deps: IDependencies) {
@@ -19,20 +16,21 @@ export class ConfigFileLoader {
   }
 
   private addDefaultValues(config: IConfig) {
-    if (!config.folders.inbox)
-      config.folders.inbox = defaultInboxFolder
-    if (!config.folders.current)
+    if (!config.folders.current) {
       config.folders.current = defaultProjectsFolder
-    if (!config.folders.recurrences)
-      config.folders.recurrences = defaultRecurrenceFolder
-    if (!config.folders.reference)
-      config.folders.reference = defaultReferenceFolder
-    if (!config.folders.archive)
+    }
+    if (!config.folders.archive) {
       config.folders.archive = defaultArchiveFolder
+    }
   }
 
   loadConfig(filePath: path): IConfig {
-    let config: IConfig = { folders: {} }
+    let config: IConfig = {
+      folders: {
+        archive: "",
+        current: ""
+      }
+    }
     if (this.deps.fs.existsSync(filePath)) {
       const fileContent = `${this.deps.fs.readFileSync(filePath)}`
       const configurationFile: IConfigFile = yaml.parse(fileContent)

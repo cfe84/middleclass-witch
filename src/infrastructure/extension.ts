@@ -31,7 +31,7 @@ import { OpenFileCommand } from './commands/OpenFileCommand'
 import { ArchiveClickedProjectCommand } from './commands/ArchiveClickedProjectCommand'
 import { FileHierarchicView } from './views/FileHierarchicView'
 import { SwitchGroupFilesByCommand } from './commands/SwitchGroupFilesByCommand'
-import { CreateNoteCommand } from './commands/createNoteCommand'
+import { CreateNoteCommand } from './commands/CreateNoteCommand'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()

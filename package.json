@@ -264,5 +264,10 @@
 	},
 	"dependencies": {
 		"yaml": "^1.10.0"
+	},
+	"icon": "doc/img/middleclass-witch.png",
+	"galleryBanner": {
+		"color": "#003399",
+		"theme": "dark"
 	}
 }

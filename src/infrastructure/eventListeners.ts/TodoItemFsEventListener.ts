@@ -1,9 +1,7 @@
 import * as vscode from 'vscode';
 import { IDependencies } from '../../contract/IDependencies';
 import { IContext } from '../../contract/IContext';
-import { threadId } from 'worker_threads';
 import { FolderParser } from '../../domain/FolderParser';
-import { Document } from 'yaml';
 
 export class TodoItemFsEventListener {
   private lastUpdate = 0
@@ -13,7 +11,7 @@ export class TodoItemFsEventListener {
   private refreshTodos() {
     if (Date.now() > this.lastUpdate + 100) {
       this.lastUpdate = Date.now()
-      this.ctx.parsedFolder = this.parser.parseFolder(this.ctx.rootFolder)
+      this.ctx.parsedFolder = this.parser.parseCurrentFolder(this.ctx.currentFolder)
       this.fileDidChange.forEach(callback => callback())
     }
   }

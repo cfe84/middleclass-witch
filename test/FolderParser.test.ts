@@ -8,7 +8,6 @@ import { IContext } from "../src/contract/IContext"
 import { FileParser } from "../src/domain/FileParser"
 import { FileProperties } from "../src/domain/FileProperties"
 import { TestUtils } from "./TestUtils"
-import { Project } from "../src/domain/Project"
 import { ParsedFile } from "../src/domain/ParsedFile"
 const ctx: IContext = fakeContext()
 describe("FolderTodoParser", () => {
@@ -73,7 +72,7 @@ describe("FolderTodoParser", () => {
 
     // when
     const parser = new FolderParser(deps, ctx, fakeFileParser)
-    const parsedFolder = parser.parseFolder(rootFolder)
+    const parsedFolder = parser.parseCurrentFolder(rootFolder)
     const todos = parsedFolder.todos
 
     // then
@@ -138,7 +137,7 @@ describe("FolderTodoParser", () => {
 
     // when
     const parser = new FolderParser(deps, ctx)
-    const todos = parser.parseFolder(rootFolder).todos
+    const todos = parser.parseCurrentFolder(rootFolder).todos
 
     // then
     it("should load empty todos", () => should(todos).have.length(0))

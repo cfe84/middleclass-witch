@@ -5,7 +5,7 @@ import { IContext } from "../../contract/IContext";
 import { FolderSelector } from "../../domain/FolderSelector";
 import { FileSelector } from '../../domain/FileSelector';
 
-export class ArchiveProjectCommand implements ICommand<string | null> {
+export class ArchiveAttributeCommand implements ICommand<string | null> {
   constructor(private deps: IDependencies, private context: IContext) {
   }
   executeAsync = async (): Promise<string | null> => {
@@ -33,6 +33,6 @@ export class ArchiveProjectCommand implements ICommand<string | null> {
     this.deps.fs.renameSync(objectToArchive, destination)
     return projectFolderName
   }
-  get Id(): string { return "mw.archiveProject" };
+  get Id(): string { return "mw.consolidateAttribute" };
 
 }

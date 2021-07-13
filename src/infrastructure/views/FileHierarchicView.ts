@@ -1,9 +1,7 @@
 import * as vscode from 'vscode';
 import { IContext } from '../../contract/IContext';
 import { IDependencies } from '../../contract/IDependencies';
-import { TodoItem } from '../../domain/TodoItem';
 import { IDictionary } from '../../domain/IDictionary';
-import { Project } from '../../domain/Project';
 import { ParsedFile } from '../../domain/ParsedFile';
 
 enum ProjectItemType {
@@ -27,7 +25,8 @@ abstract class GroupOrTodo extends vscode.TreeItem {
   }
 }
 
-class GroupItem extends GroupOrTodo {
+export class GroupItem extends GroupOrTodo {
+  contextValue = "group"
   type: ProjectItemType = ProjectItemType.Project
   constructor(public attributeValue: string, public files: ParsedFile[]) {
     super(attributeValue)
@@ -43,9 +42,10 @@ function or(a: any, b: string) {
   return `${a}`
 }
 
-class FileItem extends GroupOrTodo {
+export class FileItem extends GroupOrTodo {
+  contextValue = "file"
   type: ProjectItemType = ProjectItemType.File
-  constructor(private file: ParsedFile) {
+  constructor(public file: ParsedFile) {
     super(or(file.fileProperties.attributes["title"], file.fileProperties.name))
 
     const mapAttributeName = (attributeName: string): string =>
@@ -118,7 +118,10 @@ export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
           res[value].push(file)
         }
       })
-    return Object.keys(res).map(attributeValue => new GroupItem(attributeValue, res[attributeValue]))
+    return Object.keys(res)
+      .sort()
+      .map(attributeValue =>
+        new GroupItem(attributeValue, res[attributeValue]))
   }
 
   private getGroupByGroups() {

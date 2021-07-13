@@ -12,7 +12,7 @@ interface File {
   _sep: number
 }
 
-export class ArchiveClickedProjectCommand implements ICommand<string | null> {
+export class ArchiveClickedAttributeCommand implements ICommand<string | null> {
   constructor(private deps: IDependencies, private context: IContext) {
   }
   get Id(): string { return "mw.archiveClickedProject" }

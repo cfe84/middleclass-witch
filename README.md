@@ -80,6 +80,7 @@ PW comes with a handy view that lists all todos in the current hierarchy. This v
 6. [ ] Consolidate attributes
 7. [ ] Handle archive based on attributes
 8. [x] Limit the folders being parsed to current
+9. [ ] Delete note
 
 ## Known Issues
 

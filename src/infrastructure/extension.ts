@@ -8,30 +8,34 @@ import { IDependencies } from '../contract/IDependencies'
 import { IContext } from '../contract/IContext'
 import { SelectFileCommand } from './commands/SelectFileCommand'
 import { ICommand } from './commands/ICommand'
-import { ArchiveProjectCommand } from './commands/ArchiveProjectCommand'
+import { AddDateToLineCommand } from './commands/AddDateToLineCommand'
+import {
+	AttributeCompletionItemProvider,
+	AttributeCompletionTriggerCharacters
+} from './completion/AttributeCompletionItemProvider'
+import { ArchiveAttributeCommand } from './commands/ArchiveAttributeCommand'
+import { ArchiveClickedAttributeCommand } from './commands/ArchiveClickedAttributeCommand'
+import { CreateNoteCommand } from './commands/CreateNoteCommand'
 import { CreateNoteFromTemplate } from './commands/CreateNoteFromTemplate'
 import { ConfigFileLoader } from '../domain/ConfigFileLoader'
-import { AddDateToLineCommand } from './commands/AddDateToLineCommand'
-import { ToggleTodoCommand } from './commands/ToggleTodoCommand'
+import { FileHierarchicView } from './views/FileHierarchicView'
+import { FolderParser } from '../domain/FolderParser'
 import { MarkTodoAsCancelledCommand } from './commands/MarkTodoAsCancelledCommand'
 import { MarkTodoAsCompleteCommand } from './commands/MarkTodoAsCompleteCommand'
 import { MarkTodoAsDelegatedCommand } from './commands/MarkTodoAsDelegatedCommand'
 import { MarkTodoAsAttentionRequiredCommand } from './commands/MarkTodoAsAttentionRequiredCommand'
 import { MarkTodoAsInProgressCommand } from './commands/MarkTodoAsInProgressCommand'
 import { MarkTodoAsTodoCommand } from './commands/MarkTodoAsTodoCommand'
-import { TodoItemFsEventListener } from './eventListeners.ts/TodoItemFsEventListener'
-import { FolderParser } from '../domain/FolderParser'
-import { TodoHierarchicView } from './views/TodoHierarchicView'
+import { OpenExternalDocument } from './commands/OpenExternalDocumentCommand'
+import { OpenFileCommand } from './commands/OpenFileCommand'
 import { SwitchGroupByCommand } from './commands/SwitchGroupByCommand'
 import { SwitchShowHideCommand } from './commands/SwitchShowHideCommand'
 import { SwitchSortByCommand } from './commands/SwitchSortCommand'
-import { AttributeCompletionItemProvider, AttributeCompletionTriggerCharacters } from './completion/AttributeCompletionItemProvider'
-import { OpenExternalDocument } from './commands/OpenExternalDocumentCommand'
-import { OpenFileCommand } from './commands/OpenFileCommand'
-import { ArchiveClickedProjectCommand } from './commands/ArchiveClickedProjectCommand'
-import { FileHierarchicView } from './views/FileHierarchicView'
 import { SwitchGroupFilesByCommand } from './commands/SwitchGroupFilesByCommand'
-import { CreateNoteCommand } from './commands/CreateNoteCommand'
+import { TodoItemFsEventListener } from './eventListeners.ts/TodoItemFsEventListener'
+import { TodoHierarchicView } from './views/TodoHierarchicView'
+import { ToggleTodoCommand } from './commands/ToggleTodoCommand'
+import { DeleteNoteCommand } from './commands/DeleteNoteCommand'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -53,9 +57,11 @@ export function activate(vscontext: vscode.ExtensionContext) {
 	const configFile = deps.path.join(rootFolder, ".mw", "config.yml")
 	const configLoader = new ConfigFileLoader(deps)
 	const config = configLoader.loadConfig(configFile)
+	const currentFolder = deps.path.join(rootFolder, config.folders.current)
 
 	const context: IContext = {
 		rootFolder,
+		currentFolder,
 		config: config || undefined,
 		parsedFolder: { todos: [], attributes: [], attributeValues: {}, files: [], projectAttributes: [] },
 		storage: vscontext.globalState,
@@ -64,10 +70,11 @@ export function activate(vscontext: vscode.ExtensionContext) {
 
 	const commands: ICommand<string | null>[] = [
 		new SelectFileCommand(deps, context),
-		new ArchiveProjectCommand(deps, context),
-		new ArchiveClickedProjectCommand(deps, context),
+		new ArchiveAttributeCommand(deps, context),
+		new ArchiveClickedAttributeCommand(deps, context),
 		new CreateNoteFromTemplate(deps, context),
 		new CreateNoteCommand(deps, context),
+		new DeleteNoteCommand(deps, context),
 		new AddDateToLineCommand(deps, context),
 		new ToggleTodoCommand(deps, context),
 		new MarkTodoAsCancelledCommand(deps, context),
@@ -93,8 +100,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		vscode.workspace.onDidCreateFiles(event => todoItemFsEventListener.onFileCreated(event)),
 		vscode.workspace.onDidDeleteFiles(event => todoItemFsEventListener.onFileDeleted(event))
 	)
-	const currentFolder = deps.path.join(context.rootFolder, context.config.folders.current)
-	context.parsedFolder = folderParser.parseFolder(currentFolder)
+	context.parsedFolder = folderParser.parseCurrentFolder(context.currentFolder)
 
 	const todosView = new TodoHierarchicView(deps, context)
 	const viewCommands = [

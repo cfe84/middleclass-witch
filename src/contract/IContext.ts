@@ -5,6 +5,7 @@ import { ParsedFolder } from "../domain/ParsedFolder";
 
 export interface IContext {
   rootFolder: path
+  currentFolder: path
   config: IConfig
   parsedFolder: ParsedFolder
   storage?: IStorage

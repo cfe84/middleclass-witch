@@ -64,7 +64,7 @@ export class FolderParser {
       }, [])
   }
 
-  public parseFolder(folder: string): ParsedFolder {
+  public parseCurrentFolder(folder: string): ParsedFolder {
     const files = this.findFolderFiles(folder)
     const allAttributes = this.listAttributes(files);
     const attributes: IDictionary<string[]> = allAttributes.attributes

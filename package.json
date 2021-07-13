@@ -16,28 +16,18 @@
 	"contributes": {
 		"commands": [
 			{
-				"command": "mw.saveFile",
-				"title": "Save Note",
-				"category": "Middleclass Witch"
-			},
-			{
 				"command": "mw.selectFile",
 				"title": "Open Note",
 				"category": "Middleclass Witch"
 			},
 			{
-				"command": "mw.archiveProject",
-				"title": "Archive Project",
+				"command": "mw.archiveAttribute",
+				"title": "Archive by attribute",
 				"category": "Middleclass Witch"
 			},
 			{
-				"command": "mw.archiveClickedProject",
-				"title": "Archive Project",
-				"category": "Middleclass Witch"
-			},
-			{
-				"command": "mw.createProject",
-				"title": "Create Project",
+				"command": "mw.archiveClickedAttribute",
+				"title": "Archive by attribute",
 				"category": "Middleclass Witch"
 			},
 			{
@@ -58,6 +48,11 @@
 			{
 				"command": "mw.createReference",
 				"title": "Create Reference Folder",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.deleteNote",
+				"title": "Delete note",
 				"category": "Middleclass Witch"
 			},
 			{
@@ -185,19 +180,11 @@
 				{
 					"command": "mw.openExternalDocument",
 					"when": "false"
-				},
-				{
-					"command": "mw.archiveClickedProject",
-					"when": "false"
 				}
 			],
 			"explorer/context": [
 				{
 					"command": "mw.openExternalDocument",
-					"group": "navigation@10"
-				},
-				{
-					"command": "mw.archiveClickedProject",
 					"group": "navigation@10"
 				}
 			],
@@ -221,6 +208,16 @@
 					"command": "mw.filesView.groupFilesBy",
 					"when": "view == mw.filesHierarchy",
 					"group": "navigation"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "mw.archiveClickedAttribute",
+					"when": "view == mw.filesHierarchy && viewItem == group"
+				},
+				{
+					"command": "mw.deleteNote",
+					"when": "view == mw.filesHierarchy && viewItem == file"
 				}
 			]
 		},

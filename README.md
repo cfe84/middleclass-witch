@@ -94,6 +94,10 @@ None yet
 
 ## Release Notes
 
+### 0.4.0
+
+Archive and consolidate by attribute
+
 ### 0.3.0
 
 - Delete notes

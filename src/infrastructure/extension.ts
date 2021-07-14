@@ -36,6 +36,7 @@ import { TodoItemFsEventListener } from './eventListeners.ts/TodoItemFsEventList
 import { TodoHierarchicView } from './views/TodoHierarchicView'
 import { ToggleTodoCommand } from './commands/ToggleTodoCommand'
 import { DeleteNoteCommand } from './commands/DeleteNoteCommand'
+import { ConsolidateClickedAttributeCommand } from './commands/ConsolidateClickedAttributeCommand'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -72,6 +73,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		new SelectFileCommand(deps, context),
 		new ArchiveAttributeCommand(deps, context),
 		new ArchiveClickedAttributeCommand(deps, context),
+		new ConsolidateClickedAttributeCommand(deps, context),
 		new CreateNoteFromTemplate(deps, context),
 		new CreateNoteCommand(deps, context),
 		new DeleteNoteCommand(deps, context),

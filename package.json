@@ -31,6 +31,11 @@
 				"category": "Middleclass Witch"
 			},
 			{
+				"command": "mw.consolidateClickedAttribute",
+				"title": "Consolidate by attribute",
+				"category": "Middleclass Witch"
+			},
+			{
 				"command": "mw.createNoteFromTemplate",
 				"title": "Create Note from Template",
 				"category": "Middleclass Witch"
@@ -213,6 +218,10 @@
 			"view/item/context": [
 				{
 					"command": "mw.archiveClickedAttribute",
+					"when": "view == mw.filesHierarchy && viewItem == group"
+				},
+				{
+					"command": "mw.consolidateClickedAttribute",
 					"when": "view == mw.filesHierarchy && viewItem == group"
 				},
 				{

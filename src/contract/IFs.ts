@@ -9,5 +9,6 @@ export interface IFs {
   mkdirSync(folder: path, options?: { recursive?: boolean }): void
   readFileSync(file: path): Buffer
   renameSync(from: path, to: path): void
+  unlinkSync(file: path): void
   writeFileSync(file: path, data: string): void
 }

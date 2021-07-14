@@ -79,11 +79,12 @@ Basic
 3. [x] Header autocomplete
 4. [x] Quick create note
 5. [ ] Handle attribute property file
-6. [ ] Consolidate attributes
+6. [x] Consolidate attributes
 7. [x] Handle archive based on attributes
 8. [x] Limit the folders being parsed to current
 9. [x] Delete note
 10. [ ] Display archive
+11. [ ] Attribute files
 
 Handle reference
 

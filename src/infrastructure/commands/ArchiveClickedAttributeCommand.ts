@@ -3,6 +3,8 @@ import { IDependencies } from '../../contract/IDependencies';
 import { IContext } from '../../contract/IContext';
 import { FolderSelector } from '../../domain/FolderSelector';
 import * as vscode from "vscode"
+import { GroupItem } from '../views/FileHierarchicView';
+import { FileOperations } from '../../domain/FileOperations';
 
 interface File {
   fsPath: string,
@@ -13,29 +15,17 @@ interface File {
 }
 
 export class ArchiveClickedAttributeCommand implements ICommand<string | null> {
+  private operations: FileOperations
+
   constructor(private deps: IDependencies, private context: IContext) {
+    this.operations = new FileOperations(deps, context)
   }
-  get Id(): string { return "mw.archiveClickedProject" }
 
-  executeAsync = async (file: File): Promise<string | null> => {
-    this.deps.logger.log(`Open ${file.fsPath}`)
-    const folderSelector = new FolderSelector({ allowThisFolder: true }, this.deps, this.context);
-    const currentFolder = this.deps.path.resolve(folderSelector.getSpecialFolder("current"))
-    const parentFolder = this.deps.path.resolve(this.deps.path.dirname(file.fsPath))
-    if (this.deps.path.resolve(parentFolder) !== this.deps.path.resolve(currentFolder)) {
-      vscode.window.showErrorMessage(`Not a project (${parentFolder} vs ${currentFolder})`)
-      return null
-    }
-    const archiveFolder = folderSelector.getSpecialFolder("archive")
-    const yearlyFolder = this.deps.path.join(archiveFolder, this.deps.date.thisYearAsYString())
-    const projectFolderName = this.deps.path.basename(file.fsPath)
+  get Id(): string { return "mw.archiveClickedAttribute" }
 
-    const destination = this.deps.path.join(yearlyFolder, projectFolderName)
-    if (!this.deps.fs.existsSync(yearlyFolder)) {
-      this.deps.fs.mkdirSync(yearlyFolder)
-    }
-    vscode.window.showInformationMessage(`Archived project ${projectFolderName}`)
-    this.deps.fs.renameSync(file.fsPath, destination)
-    return projectFolderName
+  executeAsync = async (group: GroupItem): Promise<string | null> => {
+    this.operations.archive(group.attributeName, group.attributeValue)
+
+    return ""
   }
 }

@@ -1,8 +1,8 @@
 import { makeFakeDeps } from "./FakeDeps"
-import { FileParser } from "../src/domain/FileParser"
-import { TodoItem, TodoStatus } from "../src/domain/TodoItem"
 import * as should from "should"
 import { TestUtils } from "./TestUtils"
+import { FileParser } from "../src/domain/FileParser"
+import { TodoItem, TodoStatus } from "../src/domain/TodoItem"
 
 describe("FileParser", () => {
   context("Todos", () => {

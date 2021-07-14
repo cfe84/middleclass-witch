@@ -9,7 +9,7 @@ enum ProjectItemType {
   File
 }
 
-abstract class GroupOrTodo extends vscode.TreeItem {
+abstract class GroupOrFile extends vscode.TreeItem {
   abstract type: ProjectItemType;
 
   public asProject(): GroupItem {
@@ -25,10 +25,10 @@ abstract class GroupOrTodo extends vscode.TreeItem {
   }
 }
 
-export class GroupItem extends GroupOrTodo {
+export class GroupItem extends GroupOrFile {
   contextValue = "group"
   type: ProjectItemType = ProjectItemType.Project
-  constructor(public attributeValue: string, public files: ParsedFile[]) {
+  constructor(public attributeName: string, public attributeValue: string, public files: ParsedFile[]) {
     super(attributeValue)
     this.collapsibleState = vscode.TreeItemCollapsibleState.Expanded
   }
@@ -42,7 +42,7 @@ function or(a: any, b: string) {
   return `${a}`
 }
 
-export class FileItem extends GroupOrTodo {
+export class FileItem extends GroupOrFile {
   contextValue = "file"
   type: ProjectItemType = ProjectItemType.File
   constructor(public file: ParsedFile) {
@@ -74,7 +74,7 @@ export class FileItem extends GroupOrTodo {
 
 const STORAGEKEY_GROUPBY = "mw.fileView.groupBy"
 
-export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> {
+export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrFile> {
 
   constructor(private deps: IDependencies, private context: IContext) {
     this._groupBy = context.storage ? context.storage.get(STORAGEKEY_GROUPBY, "project") : "project"
@@ -88,15 +88,15 @@ export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
     this.refresh()
   }
 
-  private onDidChangeTreeDataEventEmitter: vscode.EventEmitter<GroupOrTodo | undefined> = new vscode.EventEmitter<GroupOrTodo | undefined>();
+  private onDidChangeTreeDataEventEmitter: vscode.EventEmitter<GroupOrFile | undefined> = new vscode.EventEmitter<GroupOrFile | undefined>();
 
-  readonly onDidChangeTreeData: vscode.Event<GroupOrTodo | undefined> = this.onDidChangeTreeDataEventEmitter.event;
+  readonly onDidChangeTreeData: vscode.Event<GroupOrFile | undefined> = this.onDidChangeTreeDataEventEmitter.event;
 
   refresh(): void {
     this.onDidChangeTreeDataEventEmitter.fire(undefined);
   }
 
-  getTreeItem(element: GroupOrTodo): GroupOrTodo {
+  getTreeItem(element: GroupOrFile): GroupOrFile {
     return element.type === ProjectItemType.Project ? element.asProject() : element.asFile()
   }
 
@@ -121,14 +121,14 @@ export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrTodo> 
     return Object.keys(res)
       .sort()
       .map(attributeValue =>
-        new GroupItem(attributeValue, res[attributeValue]))
+        new GroupItem(attributeName, attributeValue, res[attributeValue]))
   }
 
   private getGroupByGroups() {
     return this.getGroupsByAttribute(this._groupBy)
   }
 
-  async getChildren(element?: GroupOrTodo | undefined): Promise<GroupOrTodo[]> {
+  async getChildren(element?: GroupOrFile | undefined): Promise<GroupOrFile[]> {
     if (element) {
       if (element.type === ProjectItemType.Project) {
         return element.asProject().filesAsTreeItems()

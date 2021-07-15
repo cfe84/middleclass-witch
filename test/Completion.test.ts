@@ -2,7 +2,6 @@ import { makeFakeDeps } from "./FakeDeps"
 import { fakeContext } from "./FakeContext"
 import { Completion } from "../src/domain/Completion"
 import * as should from "should"
-import { Context } from "mocha"
 
 describe("Completion", () => {
   // given

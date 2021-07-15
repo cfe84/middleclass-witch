@@ -1,8 +1,64 @@
 import { IContext } from "../contract/IContext";
 import { IDependencies } from "../contract/IDependencies";
+import { ParsedFile } from "./ParsedFile";
+
+export enum Matching {
+  Name = 1,
+  Attribute = 2
+}
+
+export interface FileMatch {
+  file: ParsedFile,
+  matching: Matching,
+  attributeName: string,
+  attributeValue: string
+}
 
 export class FileOperations {
   constructor(private deps: IDependencies, private context: IContext) { }
+
+  private matchString(search: string, inString: string): boolean {
+    search = search.toLowerCase()
+    inString = inString.toLowerCase()
+    let inIndex = 0
+    for (let i = 0; i < search.length; i++) {
+      while (search[i] !== inString[inIndex]) {
+        if (inIndex >= inString.length) {
+          return false
+        }
+        inIndex++
+      }
+      inIndex++
+    }
+    return true;
+  }
+
+  searchFiles(search: string): FileMatch[] {
+    const files = this.context.parsedFolder.files
+    const nameMatches = files
+      .filter(file => this.matchString(search, file.fileProperties.name))
+      .map(file => ({
+        file,
+        matching: Matching.Name,
+        attributeName: "filename",
+        attributeValue: file.fileProperties.name
+      }) as FileMatch)
+    const attributeMatches = files
+      .map(file => {
+        const attributes = Object.keys(file.fileProperties.attributes)
+        const matchingAttributes = attributes.filter((att) => this.matchString(search, `${file.fileProperties.attributes[att]}`))
+        return matchingAttributes.map(attributeName => ({
+          file,
+          matching: Matching.Attribute,
+          attributeName,
+          attributeValue: file.fileProperties.attributes[attributeName]
+        }) as FileMatch)
+      })
+      .reduce((prev, curr) => {
+        return prev.concat(curr)
+      }, [] as FileMatch[])
+    return nameMatches.concat(attributeMatches)
+  }
 
   archive(attributeName: string, attributeValue: string) {
     const folderName = `${attributeName} - ${attributeValue}`

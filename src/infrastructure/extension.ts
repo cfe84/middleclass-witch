@@ -12,7 +12,7 @@ import { AddDateToLineCommand } from './commands/AddDateToLineCommand'
 import {
 	AttributeCompletionItemProvider,
 	AttributeCompletionTriggerCharacters
-} from './completion/AttributeCompletionItemProvider'
+} from './language/AttributeCompletionItemProvider'
 import { ArchiveAttributeCommand } from './commands/ArchiveAttributeCommand'
 import { ArchiveClickedAttributeCommand } from './commands/ArchiveClickedAttributeCommand'
 import { CreateNoteCommand } from './commands/CreateNoteCommand'
@@ -37,6 +37,7 @@ import { TodoHierarchicView } from './views/TodoHierarchicView'
 import { ToggleTodoCommand } from './commands/ToggleTodoCommand'
 import { DeleteNoteCommand } from './commands/DeleteNoteCommand'
 import { ConsolidateClickedAttributeCommand } from './commands/ConsolidateClickedAttributeCommand'
+import { FilePropertiesWorkspaceSymbolsProvider } from './language/FilePropertiesWorkspaceSymbolsProvider'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -131,6 +132,12 @@ export function activate(vscontext: vscode.ExtensionContext) {
 	vscontext.subscriptions.push(
 		vscode.languages.registerCompletionItemProvider("markdown", attributeCompletion, ...AttributeCompletionTriggerCharacters)
 	)
+
+	const symbolsProvider = new FilePropertiesWorkspaceSymbolsProvider(deps, context)
+	vscontext.subscriptions.push(
+		vscode.languages.registerWorkspaceSymbolProvider(symbolsProvider)
+	)
+
 	logger.log("Loaded")
 }
 

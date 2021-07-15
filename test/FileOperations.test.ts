@@ -6,7 +6,7 @@ import { TestUtils } from "./TestUtils"
 import { IDictionary } from "../src/domain/IDictionary"
 import { ParsedFile } from "../src/domain/ParsedFile"
 
-import { FileOperations } from "../src/domain/FileOperations"
+import { FileMatch, FileOperations, Matching } from "../src/domain/FileOperations"
 
 const makeFakeFile = (name: string, attributes: IDictionary<string>): ParsedFile => ({
   fileProperties: {
@@ -86,5 +86,53 @@ describe("File operations", function () {
       td.verify(deps.fs.readFileSync(f2.fileProperties.path), { times: 0 })
       td.verify(deps.fs.unlinkSync(f2.fileProperties.path), { times: 0 })
     })
+  })
+
+  const testFileMatch = (finds: FileMatch[], attributeName: string) => (file: ParsedFile) => {
+    should(TestUtils.findObj(finds, {
+      attributeName: attributeName,
+      attributeValue: attributeName === "filename"
+        ? file.fileProperties.name
+        : file.fileProperties.attributes[attributeName],
+      file: file,
+      matching: attributeName === "filename" ? Matching.Name : Matching.Attribute
+    })).not.be.undefined()
+  }
+
+  context.only("search file names", function () {
+    // given
+    const ctx = fakeContext()
+    const deps = makeFakeDeps()
+
+    const file1 = makeFakeFile("bob adminton", { stream: "interviews", step: "phone screen" })
+    const file2 = makeFakeFile("Lisa Durham", { stream: "interviews", step: "loop" })
+    const file3 = makeFakeFile("Review with Bob", { stream: "super important project" })
+    const file4 = makeFakeFile("Little Interview process during calls review", { stream: "interview management" })
+
+    ctx.parsedFolder.files = [file1, file2, file3, file4]
+
+    const ops = new FileOperations(deps, ctx)
+
+    it("finds simple names", () => {
+      const finds = ops.searchFiles("bob")
+
+      should(finds).have.length(2)
+      const nameShouldMatch = [file1, file3]
+      nameShouldMatch.forEach(testFileMatch(finds, "filename"))
+    })
+    it("finds in attributes as well", function () {
+      const finds = ops.searchFiles("interview")
+      should(finds).have.length(4)
+      testFileMatch(finds, "filename")(file4)
+      const filesWithMatchingAttributes = [file1, file2, file4]
+      filesWithMatchingAttributes.forEach(testFileMatch(finds, "stream"))
+    })
+    it("searches terms separated in the title", () => {
+      const finds = ops.searchFiles("lidu")
+      should(finds).have.length(2)
+      const match = [file2, file4]
+      match.forEach(testFileMatch(finds, "filename"))
+    })
+    it("finds partial matches")
   })
 })

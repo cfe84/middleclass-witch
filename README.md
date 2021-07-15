@@ -85,6 +85,7 @@ Basic
 9. [x] Delete note
 10. [ ] Display archive
 11. [ ] Attribute files
+12. [x] Quick search with title
 
 Handle reference
 
@@ -93,6 +94,10 @@ Handle reference
 None yet
 
 ## Release Notes
+
+### 0.5.0
+
+- Search with title and attribute using symbol search
 
 ### 0.4.0
 

@@ -6,6 +6,26 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"args": [
+				"-u",
+				"tdd",
+				"--timeout",
+				"999999",
+				"--colors",
+				"--require",
+				"ts-node/register",
+				"${workspaceFolder}/test/**/*.ts"
+			],
+			"internalConsoleOptions": "openOnSessionStart",
+			"name": "Mocha Tests",
+			"program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+			"request": "launch",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"type": "pwa-node"
+		},
+		{
 			"name": "Run Extension",
 			"type": "extensionHost",
 			"request": "launch",

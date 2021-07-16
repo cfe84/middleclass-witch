@@ -82,7 +82,7 @@ class TodoTreeItem extends GroupOrTodo {
         : ""
     this.command = {
       title: "Open",
-      command: "pw.openAtLine",
+      command: "mw.openAtLine",
       arguments: [vscode.Uri.file(todo.file), todo.line]
     }
 

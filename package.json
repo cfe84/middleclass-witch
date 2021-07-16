@@ -21,6 +21,11 @@
 				"category": "Middleclass Witch"
 			},
 			{
+				"command": "mw.openAtLine",
+				"title": "Open at line",
+				"category": "Middleclass Witch"
+			},
+			{
 				"command": "mw.archiveAttribute",
 				"title": "Archive by attribute",
 				"category": "Middleclass Witch"

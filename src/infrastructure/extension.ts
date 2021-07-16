@@ -39,6 +39,7 @@ import { DeleteNoteCommand } from './commands/DeleteNoteCommand'
 import { ConsolidateClickedAttributeCommand } from './commands/ConsolidateClickedAttributeCommand'
 import { FilePropertiesWorkspaceSymbolsProvider } from './language/FilePropertiesWorkspaceSymbolsProvider'
 import { FileToggleCollapseCommand } from './commands/views/FileToggleCollapseCommand'
+import { OpenAtLineCommand } from './commands/OpenAtLineCommand'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -88,7 +89,8 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		new MarkTodoAsInProgressCommand(deps, context),
 		new MarkTodoAsTodoCommand(deps, context),
 		new OpenExternalDocument(deps, context),
-		new OpenFileCommand(deps, context)
+		new OpenFileCommand(deps, context),
+		new OpenAtLineCommand(deps, context),
 	]
 	commands.forEach(command => {
 		let disposable = vscode.commands.registerCommand(command.Id, command.executeAsync);

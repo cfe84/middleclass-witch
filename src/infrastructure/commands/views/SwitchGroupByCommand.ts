@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { ICommand } from './ICommand';
-import { IDependencies } from '../../contract/IDependencies';
-import { IContext } from '../../contract/IContext';
-import { TodoHierarchicView, GroupByOption, GroupByConfig } from '../views/TodoHierarchicView';
+import { ICommand } from '../ICommand';
+import { IDependencies } from '../../../contract/IDependencies';
+import { IContext } from '../../../contract/IContext';
+import { TodoHierarchicView, GroupByOption, GroupByConfig } from '../../views/TodoHierarchicView';
 
 class GroupByMenuOption {
   constructor(public label: string, public groupByOption: GroupByConfig) { }
@@ -17,7 +17,6 @@ export class SwitchGroupByCommand implements ICommand<string | null> {
     const options = [
       new GroupByMenuOption("Disable grouping", { groupByOption: GroupByOption.nogroups }),
       new GroupByMenuOption("By status", { groupByOption: GroupByOption.status }),
-      new GroupByMenuOption("By project", { groupByOption: GroupByOption.project })
     ].concat(this.context.parsedFolder.attributes
       .filter((attributeName: string) => attributeName !== "selected")
       .map(

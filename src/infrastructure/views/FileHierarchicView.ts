@@ -29,7 +29,7 @@ export class GroupItem extends GroupOrFile {
   contextValue = "group"
   type: ProjectItemType = ProjectItemType.Project
   constructor(public attributeName: string, public attributeValue: string, public files: ParsedFile[]) {
-    super(attributeValue)
+    super("📂 " + attributeValue)
     this.collapsibleState = vscode.TreeItemCollapsibleState.Expanded
   }
   filesAsTreeItems = () => this.files.map(file => new FileItem(file))
@@ -46,7 +46,7 @@ export class FileItem extends GroupOrFile {
   contextValue = "file"
   type: ProjectItemType = ProjectItemType.File
   constructor(public file: ParsedFile) {
-    super(or(file.fileProperties.attributes["title"], file.fileProperties.name))
+    super("📝 " + or(file.fileProperties.attributes["title"], file.fileProperties.name))
 
     const mapAttributeName = (attributeName: string): string =>
       attributeName === "selected" ? "📌"
@@ -75,9 +75,20 @@ export class FileItem extends GroupOrFile {
 const STORAGEKEY_GROUPBY = "mw.fileView.groupBy"
 
 export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrFile> {
-
+  private groups: GroupItem[] | undefined
+  private collapsed: boolean = false
   constructor(private deps: IDependencies, private context: IContext) {
     this._groupBy = context.storage ? context.storage.get(STORAGEKEY_GROUPBY, "project") : "project"
+  }
+
+  async toggleCollapsed() {
+    this.collapsed = !this.collapsed
+    if (this.groups === undefined) {
+      return
+    }
+    this.groups.forEach(elt => elt.collapsibleState = this.collapsed
+      ? vscode.TreeItemCollapsibleState.Collapsed
+      : vscode.TreeItemCollapsibleState.Expanded)
   }
 
   private _groupBy: string
@@ -135,8 +146,8 @@ export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrFile> 
       }
       return []
     }
-    let groups = this.getGroupByGroups()
-    return groups
+    this.groups = this.getGroupByGroups()
+    return this.groups
   }
 
 }

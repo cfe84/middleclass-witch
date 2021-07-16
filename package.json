@@ -122,7 +122,12 @@
 			},
 			{
 				"command": "mw.filesView.groupFilesBy",
-				"title": "$(debug-collapse-all)",
+				"title": "Group files",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.filesView.toggleCollapse",
+				"title": "Collapse files",
 				"category": "Middleclass Witch"
 			}
 		],
@@ -211,6 +216,11 @@
 				},
 				{
 					"command": "mw.filesView.groupFilesBy",
+					"when": "view == mw.filesHierarchy",
+					"group": "navigation"
+				},
+				{
+					"command": "mw.filesView.toggleCollapse",
 					"when": "view == mw.filesHierarchy",
 					"group": "navigation"
 				}

@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import { ICommand } from './ICommand';
-import { IDependencies } from '../../contract/IDependencies';
-import { IContext } from '../../contract/IContext';
+import { ICommand } from '../ICommand';
+import { IDependencies } from '../../../contract/IDependencies';
+import { IContext } from '../../../contract/IContext';
 import {
   FileHierarchicView
-} from '../views/FileHierarchicView';
+} from '../../views/FileHierarchicView';
 
 class GroupByMenuOption {
   constructor(public label: string, public groupByOption: string) { }

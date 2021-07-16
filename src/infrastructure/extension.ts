@@ -28,16 +28,17 @@ import { MarkTodoAsInProgressCommand } from './commands/MarkTodoAsInProgressComm
 import { MarkTodoAsTodoCommand } from './commands/MarkTodoAsTodoCommand'
 import { OpenExternalDocument } from './commands/OpenExternalDocumentCommand'
 import { OpenFileCommand } from './commands/OpenFileCommand'
-import { SwitchGroupByCommand } from './commands/SwitchGroupByCommand'
+import { SwitchGroupByCommand } from './commands/views/SwitchGroupByCommand'
 import { SwitchShowHideCommand } from './commands/SwitchShowHideCommand'
 import { SwitchSortByCommand } from './commands/SwitchSortCommand'
-import { SwitchGroupFilesByCommand } from './commands/SwitchGroupFilesByCommand'
+import { SwitchGroupFilesByCommand } from './commands/views/SwitchGroupFilesByCommand'
 import { TodoItemFsEventListener } from './eventListeners.ts/TodoItemFsEventListener'
 import { TodoHierarchicView } from './views/TodoHierarchicView'
 import { ToggleTodoCommand } from './commands/ToggleTodoCommand'
 import { DeleteNoteCommand } from './commands/DeleteNoteCommand'
 import { ConsolidateClickedAttributeCommand } from './commands/ConsolidateClickedAttributeCommand'
 import { FilePropertiesWorkspaceSymbolsProvider } from './language/FilePropertiesWorkspaceSymbolsProvider'
+import { FileToggleCollapseCommand } from './commands/views/FileToggleCollapseCommand'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -118,9 +119,14 @@ export function activate(vscontext: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider("mw.todoHierarchy", todosView)
 
 	const filesView = new FileHierarchicView(deps, context)
-	const cmd = new SwitchGroupFilesByCommand(deps, context, filesView)
-	let disposable = vscode.commands.registerCommand(cmd.Id, cmd.executeAsync);
-	vscontext.subscriptions.push(disposable);
+	const fileCommands = [
+		new SwitchGroupFilesByCommand(deps, context, filesView),
+		new FileToggleCollapseCommand(deps, context, filesView)
+	]
+	fileCommands.forEach(command => {
+		let disposable = vscode.commands.registerCommand(command.Id, command.executeAsync);
+		vscontext.subscriptions.push(disposable);
+	})
 	vscode.window.registerTreeDataProvider("mw.filesHierarchy", filesView)
 
 	todoItemFsEventListener.fileDidChange.push(() => {

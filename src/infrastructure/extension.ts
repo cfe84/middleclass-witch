@@ -127,7 +127,8 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		let disposable = vscode.commands.registerCommand(command.Id, command.executeAsync);
 		vscontext.subscriptions.push(disposable);
 	})
-	vscode.window.registerTreeDataProvider("mw.filesHierarchy", filesView)
+	const fileTreeView = vscode.window.createTreeView("mw.filesHierarchy", { treeDataProvider: filesView })
+	vscontext.subscriptions.push(fileTreeView)
 
 	todoItemFsEventListener.fileDidChange.push(() => {
 		todosView.refresh()

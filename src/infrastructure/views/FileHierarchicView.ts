@@ -9,7 +9,7 @@ enum ProjectItemType {
   File
 }
 
-abstract class GroupOrFile extends vscode.TreeItem {
+export abstract class GroupOrFile extends vscode.TreeItem {
   abstract type: ProjectItemType;
 
   public asProject(): GroupItem {
@@ -86,9 +86,7 @@ export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrFile> 
     if (this.groups === undefined) {
       return
     }
-    this.groups.forEach(elt => elt.collapsibleState = this.collapsed
-      ? vscode.TreeItemCollapsibleState.Collapsed
-      : vscode.TreeItemCollapsibleState.Expanded)
+    this.groups.forEach(group => { })
   }
 
   private _groupBy: string

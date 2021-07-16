@@ -30,7 +30,7 @@ export class GroupItem extends GroupOrFile {
   type: ProjectItemType = ProjectItemType.Project
   constructor(public attributeName: string, public attributeValue: string, public files: ParsedFile[]) {
     super("📂 " + attributeValue)
-    this.collapsibleState = vscode.TreeItemCollapsibleState.Expanded
+    this.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed
   }
   filesAsTreeItems = () => this.files.map(file => new FileItem(file))
 }

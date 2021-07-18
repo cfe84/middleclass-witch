@@ -99,7 +99,7 @@ describe("File operations", function () {
     })).not.be.undefined()
   }
 
-  context.only("search file names", function () {
+  context("search file names", function () {
     // given
     const ctx = fakeContext()
     const deps = makeFakeDeps()

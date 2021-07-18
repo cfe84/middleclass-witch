@@ -18,7 +18,6 @@ export class SwitchSortByCommand implements ICommand<string | null> {
     const options = [
       new SortByMenuOption(currentConfig.sortDirection === SortByDirection.up ? "Sort down" : "Sort up", { sortByOption: currentConfig.sortByOption, sortDirection: currentConfig.sortDirection === SortByDirection.up ? SortByDirection.down : SortByDirection.up, attributeName: currentConfig.attributeName }),
       new SortByMenuOption("By status", { sortByOption: SortByOption.status, sortDirection: SortByDirection.up }),
-      new SortByMenuOption("By project", { sortByOption: SortByOption.project, sortDirection: SortByDirection.up })
     ].concat(this.context.parsedFolder.attributes
       .filter((attributeName: string) => attributeName !== "selected")
       .map(

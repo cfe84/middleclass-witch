@@ -15,4 +15,5 @@ export interface TodoItem {
   file: string
   attributes: IDictionary<string | boolean>
   line?: number
+  subtasks?: TodoItem[]
 }

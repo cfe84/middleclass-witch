@@ -4,6 +4,13 @@ import { LineOperations } from "./LineOperations"
 import { TodoItem } from "./TodoItem"
 import * as yaml from "yaml"
 
+export interface ITodoParsingResult {
+  isTodo: boolean;
+  todo?: TodoItem;
+  isBlank?: boolean;
+  indentLevel: number;
+}
+
 export class FileParser {
   private lineOperations: LineOperations
 
@@ -11,14 +18,70 @@ export class FileParser {
     this.lineOperations = new LineOperations(deps)
   }
 
+
+  private createTodoTreeStructure(lines: string[], parsingResults: ITodoParsingResult[]) {
+    let parentStack: ITodoParsingResult[] = []
+    const getParent = () => parentStack[parentStack.length - 1]
+    let lastVisitedTodo: ITodoParsingResult | undefined
+    parsingResults.forEach((current, i) => {
+      if (!lastVisitedTodo) {
+        if (current.isTodo) {
+          lastVisitedTodo = current
+        }
+        return
+      }
+
+      if (lines[i].match(/^\s*$/)) {
+        return
+      }
+
+      const isDeeperThanLastTodo = ((current.indentLevel as number) > (lastVisitedTodo.indentLevel as number))
+      if (isDeeperThanLastTodo) {
+        if (current.isTodo) {
+          parentStack.push(lastVisitedTodo);
+          (lastVisitedTodo.todo as TodoItem).subtasks = [current.todo as TodoItem]
+        }
+      } else {
+        const isDeeperThanParent = () => ((current.indentLevel as number) > (getParent().indentLevel as number))
+        while (getParent() && !isDeeperThanParent()) {
+          parentStack.pop()
+        }
+        if (getParent() && current.isTodo) {
+          (getParent().todo as TodoItem).subtasks?.push(current.todo as TodoItem)
+        }
+      }
+      if (current.isTodo) {
+        lastVisitedTodo = current
+      }
+    })
+  }
+
+  private removeSubtasksFromTree(todos: TodoItem[]) {
+    const toRemove = []
+    for (let i = 0; i < todos.length; i++) {
+      const todo = todos[i]
+      if (todo.subtasks) {
+        toRemove.push(...todo.subtasks)
+      }
+    }
+    toRemove.forEach(subtask => {
+      const idx = todos.findIndex(t => t === subtask)
+      todos.splice(idx, 1)
+    })
+  }
+
+
   findTodos(content: string, file: string): TodoItem[] {
     const lines = content.split("\n")
-    const todos = lines
-      .map((line, number) => this.lineOperations.toTodo(line, number))
-      .filter(todo => todo !== null) as TodoItem[]
-    todos.forEach(todo => {
+    const parsingResults = lines.map((line, number) => this.lineOperations.toTodo(line, number))
+    this.createTodoTreeStructure(lines, parsingResults)
+    const todos = parsingResults
+      .filter(todoParsingResult => todoParsingResult.isTodo)
+      .map(result => result.todo) as TodoItem[]
+    todos.forEach((todo) => {
       todo.file = file
     })
+    this.removeSubtasksFromTree(todos)
     return todos
   }
 

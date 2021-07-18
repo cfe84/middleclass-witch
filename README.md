@@ -78,7 +78,7 @@ Basic
 2. [x] Project view
 3. [x] Header autocomplete
 4. [x] Quick create note
-5. [ ] Handle attribute property file
+5. [ ] Handle attribute property file     
 6. [x] Consolidate attributes
 7. [x] Handle archive based on attributes
 8. [x] Limit the folders being parsed to current

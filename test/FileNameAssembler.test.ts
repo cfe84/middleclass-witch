@@ -1,7 +1,7 @@
 import { makeFakeDeps } from "./FakeDeps"
 import { FileNameAssembler } from "../src/domain/FileNameAssembler"
-import * as td from "testdouble"
-import * as should from "should"
+import td from "testdouble"
+import should from "should"
 
 describe("FileNameAssembler", () => {
   // given

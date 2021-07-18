@@ -1,5 +1,5 @@
 import { IDependencies } from "../src/contract/IDependencies";
-import * as td from "testdouble"
+import td from "testdouble"
 import { ILogger } from "../src/contract/ILogger";
 import { IDate } from "../src/contract/IDate";
 import { IFs } from "../src/contract/IFs";

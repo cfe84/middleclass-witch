@@ -73,9 +73,9 @@ export class LineOperations {
     );
   }
 
-  convertDateAttributes(
-    parsedAttributes: IAttributesStructure
-  ): IAttributesStructure {
+  convertDateAttributes(line: string): string {
+    const parsedLine = this.parseLine(line);
+    const parsedAttributes = this.parseAttributes(parsedLine.line);
     Object.keys(parsedAttributes.attributes).forEach((key) => {
       const val = parsedAttributes.attributes[key];
       if (typeof val === "string") {
@@ -85,13 +85,6 @@ export class LineOperations {
         }
       }
     });
-    return parsedAttributes;
-  }
-
-  completeLine(line: string): string {
-    const parsedLine = this.parseLine(line);
-    const parsedAttributes = this.parseAttributes(parsedLine.line);
-    this.convertDateAttributes(parsedAttributes);
     parsedLine.line = this.attributesToString(parsedAttributes);
     return this.lineToString(parsedLine);
   }

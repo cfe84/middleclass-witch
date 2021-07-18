@@ -4,15 +4,17 @@ import { IContext } from "../../contract/IContext";
 import { LineOperations } from "../../domain/LineOperations";
 import { SubstituteLine } from "./SubstituteLine";
 
-export class CompleteLineCommand implements ICommand<string | null> {
-  constructor(private deps: IDependencies, context: IContext) {}
+export class ConvertDateAttributesCommand implements ICommand<string | null> {
+  constructor(private deps: IDependencies, context: IContext) { }
   get Id(): string {
-    return "pw.completeLine";
+    return "mw.convertDateAttributes";
   }
 
   executeAsync = async (): Promise<string | null> => {
     const lineOperations = new LineOperations(this.deps);
-    SubstituteLine.substitute((line) => lineOperations.completeLine(line));
+    SubstituteLine.substitute((line) =>
+      lineOperations.convertDateAttributes(line)
+    );
     return "";
   };
 }

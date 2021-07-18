@@ -7,7 +7,7 @@ export class StdDate implements IDate {
   }
   todayAsYMDString(): string {
     const date = new Date()
-    return date.toISOString().substr(0, 19)
+    return date.toISOString().substr(0, 10)
   }
   nowAsYMDString(): string {
     const date = new Date()

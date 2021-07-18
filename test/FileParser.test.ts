@@ -1,5 +1,5 @@
 import { makeFakeDeps } from "./FakeDeps"
-import * as should from "should"
+import should from "should"
 import { TestUtils } from "./TestUtils"
 import { FileParser } from "../src/domain/FileParser"
 import { TodoItem, TodoStatus } from "../src/domain/TodoItem"

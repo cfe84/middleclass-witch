@@ -1,9 +1,19 @@
 import { IContext } from "../contract/IContext";
 import { deepStrictEqual } from "assert";
 import { IDependencies } from "../contract/IDependencies";
+import * as chrono from "chrono-node";
+import { DateTime } from "luxon";
 
 export class Completion {
   constructor(private deps: IDependencies, private context: IContext) { }
+
+  public static completeDate(prompt: string): string | null {
+    const parseResult = chrono.parseDate(prompt);
+    if (parseResult !== null) {
+      return DateTime.fromJSDate(parseResult).toLocal().toISODate();
+    }
+    return null;
+  }
 
   private completeAttribute(beginning: string): string[] {
     return this.context.parsedFolder.attributes.filter((attr: string) => attr.startsWith(beginning))

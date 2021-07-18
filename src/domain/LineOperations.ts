@@ -2,114 +2,188 @@ import { IDependencies } from "../contract/IDependencies";
 import { TodoItem, TodoStatus } from "./TodoItem";
 import { IDictionary } from "./IDictionary";
 import { TextDecoder } from "util";
+import { Completion } from "./Completion";
 
 interface ILineStructure {
-  indentation: string
-  listMarker: string
-  checkbox: string
-  date: string
-  line: string
+  indentation: string;
+  listMarker: string;
+  checkbox: string;
+  date: string;
+  line: string;
+}
+
+export interface ITodoParsingResult {
+  isTodo: boolean;
+  todo?: TodoItem;
+  isBlank?: boolean;
+  indentLevel: number;
+}
+
+interface IAttributesStructure {
+  textWithoutAttributes: string;
+  attributes: IDictionary<string | boolean>;
 }
 
 export class LineOperations {
   constructor(private deps: IDependencies) { }
 
   private parseLine(line: string): ILineStructure {
-    const regexp = /^(\s*)?(?:([*-]|\d+\.)\s*)?(?:(\[.?\])\s+)?(?:((?:\d\d\d\d-)?\d\d-\d\d):\s*)?(.+)/
-    const parsed = regexp.exec(line)
+    const regexp =
+      /^(\s*)?(?:([*-]|\d+\.)\s*)?(?:(\[.?\])\s+)?(?:((?:\d\d\d\d-)?\d\d-\d\d):\s*)?(.+)/;
+    const parsed = regexp.exec(line);
     if (!parsed) {
       return {
         indentation: "",
         listMarker: "",
         checkbox: "",
         date: "",
-        line: line
-      }
+        line: line,
+      };
     }
     return {
       indentation: parsed[1] || "",
       listMarker: parsed[2] || "",
       checkbox: parsed[3] || "",
       date: parsed[4] || "",
-      line: parsed[5] || ""
-    }
+      line: parsed[5] || "",
+    };
   }
 
   private lineToString(line: ILineStructure): string {
-    const space = (item: string, char: string = " ") => item ? `${item}${char}` : ""
-    return `${line.indentation}${space(line.listMarker)}${space(line.checkbox)}${space(line.date, ": ")}${line.line}`
+    const space = (item: string, char: string = " ") =>
+      item ? `${item}${char}` : "";
+    return `${line.indentation}${space(line.listMarker)}${space(
+      line.checkbox
+    )}${space(line.date, ": ")}${line.line}`;
+  }
+
+  private attributesToString(
+    attributesStructure: IAttributesStructure
+  ): string {
+    const attributes = Object.keys(attributesStructure.attributes)
+      .map((key) =>
+        typeof attributesStructure.attributes[key] === "boolean"
+          ? `@${key}`
+          : `@${key}(${attributesStructure.attributes[key]})`
+      )
+      .join(" ");
+    return (
+      attributesStructure.textWithoutAttributes +
+      (attributes.length ? ` ` + attributes : "")
+    );
+  }
+
+  convertDateAttributes(
+    parsedAttributes: IAttributesStructure
+  ): IAttributesStructure {
+    Object.keys(parsedAttributes.attributes).forEach((key) => {
+      const val = parsedAttributes.attributes[key];
+      if (typeof val === "string") {
+        const completion = Completion.completeDate(val as string);
+        if (completion !== null) {
+          parsedAttributes.attributes[key] = completion;
+        }
+      }
+    });
+    return parsedAttributes;
+  }
+
+  completeLine(line: string): string {
+    const parsedLine = this.parseLine(line);
+    const parsedAttributes = this.parseAttributes(parsedLine.line);
+    this.convertDateAttributes(parsedAttributes);
+    parsedLine.line = this.attributesToString(parsedAttributes);
+    return this.lineToString(parsedLine);
   }
 
   addDate(line: string): string {
-    const todaysDate = this.deps.date.todayAsYMDString()
-    const parsedLine = this.parseLine(line)
-    parsedLine.date = todaysDate
-    return this.lineToString(parsedLine)
+    const todaysDate = this.deps.date.todayAsYMDString();
+    const parsedLine = this.parseLine(line);
+    parsedLine.date = todaysDate;
+    return this.lineToString(parsedLine);
   }
 
   toggleTodo(line: string): string {
-    const parsedLine = this.parseLine(line)
+    const parsedLine = this.parseLine(line);
     if (parsedLine.checkbox) {
-      parsedLine.checkbox = ""
+      parsedLine.checkbox = "";
     } else {
-      parsedLine.checkbox = "[ ]"
+      parsedLine.checkbox = "[ ]";
     }
-    return this.lineToString(parsedLine)
+    return this.lineToString(parsedLine);
   }
 
   setCheckmark(line: string, checkMark: string): string {
-    const parsedLine = this.parseLine(line)
-    parsedLine.checkbox = `[${checkMark}]`
-    return this.lineToString(parsedLine)
+    const parsedLine = this.parseLine(line);
+    parsedLine.checkbox = `[${checkMark}]`;
+    return this.lineToString(parsedLine);
   }
 
   private markToStatus = (mark: string) => {
-    mark = mark.toLowerCase()
-    return mark === "]" ? TodoStatus.Canceled
-      : mark === "-" ? TodoStatus.InProgress
-        : mark === "!" ? TodoStatus.AttentionRequired
-          : mark === "x" ? TodoStatus.Complete
-            : mark === " " ? TodoStatus.Todo
-              : mark === "d" ? TodoStatus.Delegated
-                : TodoStatus.Todo
-  }
+    mark = mark.toLowerCase();
+    return mark === "]"
+      ? TodoStatus.Canceled
+      : mark === "-"
+        ? TodoStatus.InProgress
+        : mark === "!"
+          ? TodoStatus.AttentionRequired
+          : mark === "x"
+            ? TodoStatus.Complete
+            : mark === " "
+              ? TodoStatus.Todo
+              : mark === "d"
+                ? TodoStatus.Delegated
+                : TodoStatus.Todo;
+  };
 
-  private parseAttributes(text: string): { textWithoutAttributes: string, attributes: IDictionary<string | boolean> } {
-    const regexp = / @(\w+)(?:\(([^)]+)\))?/g
-    const matches = text.match(regexp)
-    const res: IDictionary<string | boolean> = {}
-    if (!matches)
-      return { textWithoutAttributes: text, attributes: res }
-    let textWithoutAttributes = text
-    matches.forEach(match => {
-      const regexp = / @(\w+)(?:\(([^)]+)\))?/g
+  private parseAttributes(text: string): IAttributesStructure {
+    const regexp = / @(\w+)(?:\(([^)]+)\))?/g;
+    const matches = text.match(regexp);
+    const res: IDictionary<string | boolean> = {};
+    if (!matches) return { textWithoutAttributes: text, attributes: res };
+    let textWithoutAttributes = text;
+    matches.forEach((match) => {
+      const regexp = / @(\w+)(?:\(([^)]+)\))?/g;
 
-      const submatch = regexp.exec(" " + match + " ")
+      const submatch = regexp.exec(" " + match + " ");
       if (!submatch) {
-        throw Error("No match?")
-        return
+        throw Error("No match?");
+        return;
       }
-      res[submatch[1]] = submatch[2] || true
-      textWithoutAttributes = textWithoutAttributes.replace(match, "")
+      res[submatch[1]] = submatch[2] || true;
+      textWithoutAttributes = textWithoutAttributes.replace(match, "");
     });
 
-    return { textWithoutAttributes, attributes: res }
+    return { textWithoutAttributes, attributes: res };
   }
 
-  toTodo(line: string, lineNumber?: number): TodoItem | null {
-    const parsedLine = this.parseLine(line)
+  private getIndentationLevel(str: string) {
+    return (str.match(/ /g)?.length || 0) + (str.match(/\t/g)?.length || 0) * 4;
+  }
+
+  toTodo(line: string, lineNumber?: number): ITodoParsingResult {
+    const parsedLine = this.parseLine(line);
+    const indentLevel = this.getIndentationLevel(parsedLine.indentation);
     if (!parsedLine.checkbox)
-      return null
-    const attributesMatching = this.parseAttributes(parsedLine.line)
+      return {
+        isTodo: false,
+        indentLevel,
+      };
+    const attributesMatching = this.parseAttributes(parsedLine.line);
     const todo: TodoItem = {
       status: this.markToStatus(parsedLine.checkbox[1]),
       text: attributesMatching.textWithoutAttributes,
       attributes: attributesMatching.attributes,
-      file: ""
-    }
+      file: "",
+    };
+    const res: ITodoParsingResult = {
+      isTodo: true,
+      todo,
+      indentLevel: this.getIndentationLevel(parsedLine.indentation),
+    };
     if (lineNumber !== undefined) {
-      todo.line = lineNumber
+      todo.line = lineNumber;
     }
-    return todo
+    return res;
   }
 }

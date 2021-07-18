@@ -138,9 +138,14 @@
 		],
 		"keybindings": [
 			{
-				"command": "mw.addDateToLine",
+				"command": "mw.completeLine",
 				"key": "Alt+.",
 				"mac": "Alt+."
+			},
+			{
+				"command": "mw.addDateToLine",
+				"key": "Alt+Ctrl+.",
+				"mac": "Alt+Ctrl+."
 			},
 			{
 				"command": "mw.toggleTodo",
@@ -287,6 +292,8 @@
 		"url": "https://github.com/cfe84/middleclass-witch"
 	},
 	"dependencies": {
+		"chrono-node": "^2.3.0",
+		"luxon": "^2.0.1",
 		"yaml": "^1.10.0"
 	},
 	"icon": "doc/img/middleclass-witch.png",

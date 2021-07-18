@@ -95,6 +95,11 @@ None yet
 
 ## Release Notes
 
+### 0.6.0
+
+- Fix todo hierarchy
+- Fix setting dates on todo
+
 ### 0.5.0
 
 - Search with title and attribute using symbol search

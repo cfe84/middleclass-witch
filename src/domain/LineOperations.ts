@@ -4,7 +4,15 @@ import { IDictionary } from "./IDictionary";
 import { TextDecoder } from "util";
 import { Completion } from "./Completion";
 
+enum LineType {
+  todo,
+  attribute,
+  none
+}
+
 interface ILineStructure {
+  lineType: LineType;
+  attributeName: string;
   indentation: string;
   listMarker: string;
   checkbox: string;
@@ -28,33 +36,57 @@ export class LineOperations {
   constructor(private deps: IDependencies) { }
 
   private parseLine(line: string): ILineStructure {
-    const regexp =
+    const todoRegexp =
       /^(\s*)?(?:([*-]|\d+\.)\s*)?(?:(\[.?\])\s+)?(?:((?:\d\d\d\d-)?\d\d-\d\d):\s*)?(.+)/;
-    const parsed = regexp.exec(line);
-    if (!parsed) {
+    const parsedTodo = todoRegexp.exec(line);
+    const attributeRegexp = /^([^\s]+):\s*(?:(\d\d\d\d-\d\d-\d\d)(?:\s*-\s*))?(.+)/;
+    const parsedAttribute = attributeRegexp.exec(line);
+    if (parsedTodo && (parsedTodo[1] || parsedTodo[2] || parsedTodo[3])) {
       return {
+        lineType: LineType.todo,
+        attributeName: "",
+        indentation: parsedTodo[1] || "",
+        listMarker: parsedTodo[2] || "",
+        checkbox: parsedTodo[3] || "",
+        date: parsedTodo[4] || "",
+        line: parsedTodo[5] || "",
+      }
+    }
+    if (parsedAttribute) {
+      return {
+        lineType: LineType.attribute,
+        attributeName: parsedAttribute[1] || "",
         indentation: "",
         listMarker: "",
         checkbox: "",
-        date: "",
-        line: line,
-      };
+        date: parsedAttribute[2] || "",
+        line: parsedAttribute[3] || "",
+      }
     }
     return {
-      indentation: parsed[1] || "",
-      listMarker: parsed[2] || "",
-      checkbox: parsed[3] || "",
-      date: parsed[4] || "",
-      line: parsed[5] || "",
+      lineType: LineType.none,
+      attributeName: "",
+      indentation: "",
+      listMarker: "",
+      checkbox: "",
+      date: "",
+      line: line,
     };
   }
 
   private lineToString(line: ILineStructure): string {
-    const space = (item: string, char: string = " ") =>
-      item ? `${item}${char}` : "";
-    return `${line.indentation}${space(line.listMarker)}${space(
-      line.checkbox
-    )}${space(line.date, ": ")}${line.line}`;
+    if (line.lineType === LineType.todo) {
+
+      const space = (item: string, char: string = " ") =>
+        item ? `${item}${char}` : "";
+      return `${line.indentation}${space(line.listMarker)}${space(
+        line.checkbox
+      )}${space(line.date, ": ")}${line.line}`;
+    }
+    if (line.lineType === LineType.attribute) {
+      return `${line.attributeName}: ${line.date ? `${line.date} - ` : ""}${line.line}`
+    }
+    return `${line.date ? line.date + ": " : ""}${line.line}`
   }
 
   private attributesToString(
@@ -98,6 +130,7 @@ export class LineOperations {
 
   toggleTodo(line: string): string {
     const parsedLine = this.parseLine(line);
+    parsedLine.lineType = LineType.todo
     if (parsedLine.checkbox) {
       parsedLine.checkbox = "";
     } else {
@@ -108,6 +141,7 @@ export class LineOperations {
 
   setCheckmark(line: string, checkMark: string): string {
     const parsedLine = this.parseLine(line);
+    parsedLine.lineType = LineType.todo
     parsedLine.checkbox = `[${checkMark}]`;
     return this.lineToString(parsedLine);
   }

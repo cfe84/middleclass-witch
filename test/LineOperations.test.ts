@@ -35,6 +35,8 @@ describe("LineOperations", () => {
       { description: "adds date to line with checkmark and dash", input: "  - [ ] this just tells something", expected: "  - [ ] TODAY: this just tells something" },
       { description: "replace date with today", input: "  - [x] 2020-01-01: this just tells something", expected: "  - [x] TODAY: this just tells something" },
       { description: "replace partial date with today", input: "  - [ ] 01-01: this just tells something", expected: "  - [ ] TODAY: this just tells something" },
+      { description: "adds date to header attribute", input: "something: attribute value", expected: "something: TODAY - attribute value" },
+      { description: "doesn't add date to non header attribute", input: "- [ ] something: not attribute value", expected: "- [ ] TODAY: something: not attribute value" },
 
     ]
     runTestCases(testCases, (line) => lineOperations.addDate(line))

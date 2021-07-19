@@ -138,7 +138,7 @@
 		],
 		"keybindings": [
 			{
-				"command": "mw.completeLine",
+				"command": "mw.convertDateAttributes",
 				"key": "Alt+.",
 				"mac": "Alt+."
 			},

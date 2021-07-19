@@ -40,6 +40,7 @@ import { ConsolidateClickedAttributeCommand } from './commands/ConsolidateClicke
 import { FilePropertiesWorkspaceSymbolsProvider } from './language/FilePropertiesWorkspaceSymbolsProvider'
 import { FileToggleCollapseCommand } from './commands/views/FileToggleCollapseCommand'
 import { OpenAtLineCommand } from './commands/OpenAtLineCommand'
+import { ConvertDateAttributesCommand } from './commands/ConvertDateAttributesCommand'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -76,6 +77,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		new SelectFileCommand(deps, context),
 		new ArchiveAttributeCommand(deps, context),
 		new ArchiveClickedAttributeCommand(deps, context),
+		new ConvertDateAttributesCommand(deps, context),
 		new ConsolidateClickedAttributeCommand(deps, context),
 		new CreateNoteFromTemplate(deps, context),
 		new CreateNoteCommand(deps, context),

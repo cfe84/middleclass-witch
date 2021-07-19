@@ -5,6 +5,7 @@ import { IDictionary } from "./IDictionary";
 import { FileParser } from "./FileParser";
 import { ParsedFile } from "./ParsedFile";
 import { ParsedFolder } from "./ParsedFolder";
+import { Attachment } from "./Attachment";
 
 interface Attributes {
   attributes: IDictionary<string[]>
@@ -55,6 +56,47 @@ export class FolderParser {
     return parsedFiles as ParsedFile[]
   }
 
+  private isMarkdownFile(path: string) {
+    return path.endsWith(".md")
+  }
+
+  private findAttributeAttachments(attributeValue: string, folder: string): Attachment[] {
+    const files = this.deps.fs.readdirSync(folder)
+    const attachments = files
+      .map(file => ({
+        path: this.deps.path.join(folder, file),
+        name: file
+      }))
+      .map((attachment) => {
+        if (this.deps.fs.lstatSync(attachment.path).isDirectory()) {
+          return this.findAttributeAttachments(attributeValue, attachment.path)
+        } else if (!this.isMarkdownFile(attachment.name)) {
+          return [attachment]
+        } else {
+          return []
+        }
+      })
+      .reduce((prev, curr) => {
+        prev = prev.concat(curr
+          .filter(project => project !== undefined))
+        return prev
+      }, [])
+    return attachments
+  }
+
+  private findAttachments(folder: string): IDictionary<Attachment[]> {
+    const res: IDictionary<Attachment[]> = {}
+    const files = this.deps.fs.readdirSync(folder)
+    files.forEach((file) => {
+      const path = this.deps.path.join(folder, file);
+      if (this.deps.fs.lstatSync(path).isDirectory()) {
+        const attachments = this.findAttributeAttachments(file, path)
+        res[file] = attachments
+      }
+    })
+    return res
+  }
+
   private aggregateTodos(files: ParsedFile[]): TodoItem[] {
     return files
       .map(file => file.todos)
@@ -69,10 +111,12 @@ export class FolderParser {
     const allAttributes = this.listAttributes(files);
     const attributes: IDictionary<string[]> = allAttributes.attributes
     const projectAttributes: IDictionary<string[]> = allAttributes.projectAttributes
+    const attachments = this.findAttachments(folder)
     const todos = this.aggregateTodos(files)
     const parsedFolder: ParsedFolder = {
       todos,
       files,
+      attachmentsByAttributeValue: attachments,
       attributes: Object.keys(attributes).sort((a, b) => a.localeCompare(b)),
       attributeValues: attributes,
       projectAttributes: Object.keys(projectAttributes)

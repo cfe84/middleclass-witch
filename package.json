@@ -202,12 +202,7 @@
 					"when": "false"
 				}
 			],
-			"explorer/context": [
-				{
-					"command": "mw.openExternalDocument",
-					"group": "navigation@10"
-				}
-			],
+			"explorer/context": [],
 			"view/title": [
 				{
 					"command": "mw.todoView.groupBy",
@@ -247,6 +242,10 @@
 				{
 					"command": "mw.deleteNote",
 					"when": "view == mw.filesHierarchy && viewItem == file"
+				},
+				{
+					"command": "mw.openExternalDocument",
+					"group": "view == mw.filesHierarchy && viewItem == attachment"
 				}
 			]
 		},

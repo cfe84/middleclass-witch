@@ -1,38 +1,62 @@
 import * as vscode from 'vscode';
 import { IContext } from '../../contract/IContext';
 import { IDependencies } from '../../contract/IDependencies';
+import { Attachment } from '../../domain/Attachment';
 import { IDictionary } from '../../domain/IDictionary';
 import { ParsedFile } from '../../domain/ParsedFile';
 
-enum ProjectItemType {
+enum FileItemType {
   Project,
-  File
+  File,
+  Attachment
 }
 
-export abstract class GroupOrFile extends vscode.TreeItem {
-  abstract type: ProjectItemType;
+export abstract class FileTreeItem extends vscode.TreeItem {
+  abstract type: FileItemType;
 
   public asProject(): GroupItem {
-    if (this.type === ProjectItemType.Project)
+    if (this.type === FileItemType.Project)
       return this as unknown as GroupItem
     throw (Error("Invalid cast (to project)"))
   }
 
   public asFile(): FileItem {
-    if (this.type === ProjectItemType.File)
+    if (this.type === FileItemType.File)
       return this as unknown as FileItem
     throw (Error("Invalid cast (to todo item)"))
   }
+
+  public asAttachment(): AttachmentItem {
+    if (this.type === FileItemType.Attachment)
+      return this as unknown as AttachmentItem
+    throw (Error("Invalid cast (to attachment)"))
+  }
 }
 
-export class GroupItem extends GroupOrFile {
+export class AttachmentItem extends FileTreeItem {
+  contextValue = "attachment"
+  type: FileItemType = FileItemType.Project
+  constructor(public attachment: Attachment) {
+    super("📄 " + attachment.name)
+    this.collapsibleState = vscode.TreeItemCollapsibleState.None
+    this.command = {
+      title: "Open",
+      command: "mw.openExternalDocument",
+      arguments: [this]
+    }
+  }
+
+}
+
+export class GroupItem extends FileTreeItem {
   contextValue = "group"
-  type: ProjectItemType = ProjectItemType.Project
-  constructor(public attributeName: string, public attributeValue: string, public files: ParsedFile[]) {
+  type: FileItemType = FileItemType.Project
+  constructor(public attributeName: string, public attributeValue: string, public files: ParsedFile[], public attachments: Attachment[]) {
     super("📂 " + attributeValue)
     this.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed
   }
   filesAsTreeItems = () => this.files.map(file => new FileItem(file))
+  attachmentsAsTreeItems = () => this.attachments.map(attachment => new AttachmentItem(attachment))
 }
 
 function or(a: any, b: string) {
@@ -42,11 +66,11 @@ function or(a: any, b: string) {
   return `${a}`
 }
 
-export class FileItem extends GroupOrFile {
+export class FileItem extends FileTreeItem {
   contextValue = "file"
-  type: ProjectItemType = ProjectItemType.File
+  type: FileItemType = FileItemType.File
   constructor(public file: ParsedFile) {
-    super("📝 " + or(file.fileProperties.attributes["title"], file.fileProperties.name))
+    super("📜 " + or(file.fileProperties.attributes["title"], file.fileProperties.name))
 
     const mapAttributeName = (attributeName: string): string =>
       attributeName === "selected" ? "📌"
@@ -74,7 +98,7 @@ export class FileItem extends GroupOrFile {
 
 const STORAGEKEY_GROUPBY = "mw.fileView.groupBy"
 
-export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrFile> {
+export class FileHierarchicView implements vscode.TreeDataProvider<FileTreeItem> {
   private groups: GroupItem[] | undefined
   private collapsed: boolean = false
   constructor(private deps: IDependencies, private context: IContext) {
@@ -97,16 +121,16 @@ export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrFile> 
     this.refresh()
   }
 
-  private onDidChangeTreeDataEventEmitter: vscode.EventEmitter<GroupOrFile | undefined> = new vscode.EventEmitter<GroupOrFile | undefined>();
+  private onDidChangeTreeDataEventEmitter: vscode.EventEmitter<FileTreeItem | undefined> = new vscode.EventEmitter<FileTreeItem | undefined>();
 
-  readonly onDidChangeTreeData: vscode.Event<GroupOrFile | undefined> = this.onDidChangeTreeDataEventEmitter.event;
+  readonly onDidChangeTreeData: vscode.Event<FileTreeItem | undefined> = this.onDidChangeTreeDataEventEmitter.event;
 
   refresh(): void {
     this.onDidChangeTreeDataEventEmitter.fire(undefined);
   }
 
-  getTreeItem(element: GroupOrFile): GroupOrFile {
-    return element.type === ProjectItemType.Project ? element.asProject() : element.asFile()
+  getTreeItem(element: FileTreeItem): FileTreeItem {
+    return element.type === FileItemType.Project ? element.asProject() : element.asFile()
   }
 
   private getGroupsByAttribute(attributeName: string): GroupItem[] {
@@ -130,17 +154,26 @@ export class FileHierarchicView implements vscode.TreeDataProvider<GroupOrFile> 
     return Object.keys(res)
       .sort()
       .map(attributeValue =>
-        new GroupItem(attributeName, attributeValue, res[attributeValue]))
+        new GroupItem(
+          attributeName,
+          attributeValue,
+          res[attributeValue],
+          this.context.parsedFolder.attachmentsByAttributeValue[attributeValue] || []))
   }
 
   private getGroupByGroups() {
     return this.getGroupsByAttribute(this._groupBy)
   }
 
-  async getChildren(element?: GroupOrFile | undefined): Promise<GroupOrFile[]> {
+  async getChildren(element?: FileTreeItem | undefined): Promise<FileTreeItem[]> {
     if (element) {
-      if (element.type === ProjectItemType.Project) {
-        return element.asProject().filesAsTreeItems()
+      if (element.type === FileItemType.Project) {
+        const project = element.asProject()
+        const files = project.filesAsTreeItems() as FileTreeItem[]
+        const attachments = project.attachmentsAsTreeItems() as FileTreeItem[]
+        const all = files
+          .concat(attachments)
+        return all
       }
       return []
     }

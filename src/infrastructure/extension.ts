@@ -67,7 +67,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		rootFolder,
 		currentFolder,
 		config: config || undefined,
-		parsedFolder: { todos: [], attributes: [], attributeValues: {}, files: [], projectAttributes: [] },
+		parsedFolder: { todos: [], attributes: [], attributeValues: {}, files: [], projectAttributes: [], attachmentsByAttributeValue: {} },
 		storage: vscontext.globalState,
 		templatesFolder: deps.path.join(rootFolder, ".mw", "templates")
 	}

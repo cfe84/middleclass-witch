@@ -27,7 +27,7 @@ describe("FolderTodoParser", () => {
     const fakeFileParser = new FakeFileParser(deps)
 
     td.when(deps.fs.lstatSync(rootFolder)).thenReturn({ isDirectory: () => true })
-    td.when(deps.fs.readdirSync(rootFolder)).thenReturn(["file.md", "PROJECTS|Something", "file.txt", ".pw"])
+    td.when(deps.fs.readdirSync(rootFolder)).thenReturn(["file.md", "PROJECTS", "file.txt", ".pw"])
     td.when(deps.fs.lstatSync("ROOT|.pw")).thenReturn({ isDirectory: () => true })
     td.when(deps.fs.readdirSync(deps.path.join(rootFolder, ".pw"))).thenReturn(["templates"])
     td.when(deps.fs.lstatSync("ROOT|.pw|templates")).thenReturn({ isDirectory: () => true })
@@ -50,8 +50,11 @@ describe("FolderTodoParser", () => {
 
     td.when(deps.fs.lstatSync("ROOT|file.txt")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.readFileSync("ROOT|file.txt")).thenReturn(Buffer.from(``))
+    td.when(deps.fs.lstatSync("ROOT|PROJECTS")).thenReturn({ isDirectory: () => true })
+    td.when(deps.fs.readdirSync("ROOT|PROJECTS")).thenReturn(["Something"])
     td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something")).thenReturn({ isDirectory: () => true })
-    td.when(deps.fs.readdirSync("ROOT|PROJECTS|Something")).thenReturn(["file2.md"])
+    td.when(deps.fs.readdirSync("ROOT|PROJECTS|Something")).thenReturn(["file2.md", "file.ppt"])
+    td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something|file.ppt")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something|file2.md")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.readFileSync("ROOT|PROJECTS|Something|file2.md")).thenReturn(Buffer.from(`file2`))
     const file2Todos = [
@@ -84,6 +87,7 @@ describe("FolderTodoParser", () => {
     it("doesn't load from txt and templates", () => {
       td.verify(fakeFileParser.findTodos("", "ROOT|.pw|templates|file.md"), { times: 0 })
       td.verify(fakeFileParser.findTodos("", "ROOT|file.txt"), { times: 0 })
+      td.verify(fakeFileParser.findTodos("", "ROOT|PROJECTS|Something|file.ppt"), { times: 0 })
     })
 
     it("loads attributes", () => {
@@ -122,6 +126,14 @@ describe("FolderTodoParser", () => {
     it("replicates attributes from file to todo", () => {
       const todo = TestUtils.findObj(parsedFolder.todos, { attributes: { project: "Something" } }) as TodoItem
       should(todo.attributes["projectAttribute"]).eql("projectValue")
+    })
+    it("load attachments", () => {
+      const somethingAttachments = parsedFolder.attachmentsByAttributeValue["PROJECTS"]
+      should(somethingAttachments).length(1)
+      should(TestUtils.findObj(somethingAttachments, {
+        name: "file.ppt",
+        path: "ROOT|PROJECTS|Something|file.ppt"
+      })).not.undefined()
     })
   })
 

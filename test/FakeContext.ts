@@ -9,6 +9,7 @@ export function fakeContext(): IContext {
       todos: [],
       attributeValues: {},
       attributes: [],
+      attachmentsByAttributeValue: {},
       projectAttributes: []
     }, config: {
       folders: {

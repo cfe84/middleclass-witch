@@ -3,7 +3,7 @@ import { ICommand } from '../ICommand';
 import { IDependencies } from '../../../contract/IDependencies';
 import { IContext } from '../../../contract/IContext';
 import {
-  FileHierarchicView, GroupOrFile
+  FileHierarchicView, FileTreeItem
 } from '../../views/FileHierarchicView';
 
 export class FileToggleCollapseCommand implements ICommand<string | null> {

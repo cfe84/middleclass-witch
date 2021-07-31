@@ -41,6 +41,7 @@ import { FilePropertiesWorkspaceSymbolsProvider } from './language/FilePropertie
 import { FileToggleCollapseCommand } from './commands/views/FileToggleCollapseCommand'
 import { OpenAtLineCommand } from './commands/OpenAtLineCommand'
 import { ConvertDateAttributesCommand } from './commands/ConvertDateAttributesCommand'
+import { OpenAttributeFolder } from './commands/OpenAttributeFolder'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -90,6 +91,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		new MarkTodoAsAttentionRequiredCommand(deps, context),
 		new MarkTodoAsInProgressCommand(deps, context),
 		new MarkTodoAsTodoCommand(deps, context),
+		new OpenAttributeFolder(deps, context),
 		new OpenExternalDocument(deps, context),
 		new OpenFileCommand(deps, context),
 		new OpenAtLineCommand(deps, context),

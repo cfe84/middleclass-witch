@@ -126,6 +126,11 @@
 				"category": "Middleclass Witch"
 			},
 			{
+				"command": "mw.openAttributeFolder",
+				"title": "Open attribute folder",
+				"category": "Middleclass Witch"
+			},
+			{
 				"command": "mw.filesView.groupFilesBy",
 				"title": "Group files",
 				"category": "Middleclass Witch"
@@ -200,6 +205,10 @@
 				{
 					"command": "mw.openExternalDocument",
 					"when": "false"
+				},
+				{
+					"command": "mw.openAttributeFolder",
+					"when": "false"
 				}
 			],
 			"explorer/context": [],
@@ -246,6 +255,10 @@
 				{
 					"command": "mw.openExternalDocument",
 					"group": "view == mw.filesHierarchy && viewItem == attachment"
+				},
+				{
+					"command": "mw.openAttributeFolder",
+					"group": "view == mw.filesHierarchy && viewItem == group"
 				}
 			]
 		},

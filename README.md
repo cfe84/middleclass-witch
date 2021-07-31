@@ -87,6 +87,7 @@ Basic
 11. [ ] Attribute files
 12. [x] Quick search with title
 13. [ ] Merge two notes
+14. [x] Group files by several layers
 
 Handle reference
 
@@ -95,6 +96,10 @@ Handle reference
 None yet
 
 ## Release Notes
+
+### 0.11.0
+
+Group file by several levels
 
 ### 0.6.0
 

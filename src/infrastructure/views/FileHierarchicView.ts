@@ -51,12 +51,10 @@ export class AttachmentItem extends FileTreeItem {
 export class GroupItem extends FileTreeItem {
   contextValue = "group"
   type: FileItemType = FileItemType.Project
-  constructor(public attributeName: string, public attributeValue: string, public files: ParsedFile[], public attachments: Attachment[]) {
+  constructor(public attributeName: string, public attributeValue: string, public children: FileTreeItem[]) {
     super("📂 " + attributeValue)
     this.collapsibleState = vscode.TreeItemCollapsibleState.Collapsed
   }
-  filesAsTreeItems = () => this.files.map(file => new FileItem(file))
-  attachmentsAsTreeItems = () => this.attachments.map(attachment => new AttachmentItem(attachment))
 }
 
 function or(a: any, b: string) {
@@ -99,23 +97,30 @@ export class FileItem extends FileTreeItem {
 const STORAGEKEY_GROUPBY = "mw.fileView.groupBy"
 
 export class FileHierarchicView implements vscode.TreeDataProvider<FileTreeItem> {
-  private groups: GroupItem[] | undefined
+  private items: FileTreeItem[] | undefined
   private collapsed: boolean = false
   constructor(private deps: IDependencies, private context: IContext) {
-    this._groupBy = context.storage ? context.storage.get(STORAGEKEY_GROUPBY, "project") : "project"
+    this._groupBy = context.storage ? context.storage.get(STORAGEKEY_GROUPBY, ["project"]) : ["project"]
+    this.migrateV11();
+  }
+
+  private migrateV11() {
+    if (!Array.isArray(this._groupBy)) {
+      this._groupBy = ["project"];
+    }
   }
 
   async toggleCollapsed() {
     this.collapsed = !this.collapsed
-    if (this.groups === undefined) {
+    if (this.items === undefined) {
       return
     }
-    this.groups.forEach(group => { })
+    this.items.forEach(group => { })
   }
 
-  private _groupBy: string
+  private _groupBy: string[]
 
-  public set groupBy(value: string) {
+  public set groupBy(value: string[]) {
     this._groupBy = value
     this.context.storage?.update(STORAGEKEY_GROUPBY, value)
     this.refresh()
@@ -133,32 +138,48 @@ export class FileHierarchicView implements vscode.TreeDataProvider<FileTreeItem>
     return element.type === FileItemType.Project ? element.asProject() : element.asFile()
   }
 
-  private getGroupsByAttribute(attributeName: string): GroupItem[] {
+  private getItemsByAttributeRec(files: ParsedFile[], attributeNames: string[]): FileTreeItem[] {
+    const attributeName = attributeNames[0]
     const res: IDictionary<ParsedFile[]> = {}
-    this.context.parsedFolder.files.forEach(
+    const nonMatchingFiles: ParsedFile[] = []
+    files.forEach(
       file => {
         if (!file.fileProperties || !file.fileProperties.attributes) {
           return
         }
         let value = `${file.fileProperties.attributes[attributeName]}`
         if (!file.fileProperties.attributes[attributeName]) {
-          value = `(empty ${attributeName})`
-        }
-        if (value) {
-          if (!res[value]) {
-            res[value] = []
+          nonMatchingFiles.push(file)
+        } else {
+          if (value) {
+            if (!res[value]) {
+              res[value] = []
+            }
+            res[value].push(file)
           }
-          res[value].push(file)
         }
       })
+    const nonMatchingFilesAsTreeItems = nonMatchingFiles
+      .sort((f1, f2) => f1.fileProperties.name.localeCompare(f2.fileProperties.name))
+      .map(file => new FileItem(file))
     return Object.keys(res)
       .sort()
-      .map(attributeValue =>
-        new GroupItem(
+      .map(attributeValue => {
+        const filesAsTreeItems = attributeNames.length <= 1
+          ? res[attributeValue].map(file => new FileItem(file)) as FileTreeItem[]
+          : this.getItemsByAttributeRec(res[attributeValue], attributeNames.slice(1))
+        const attachmentsAsTreeItems = (this.context.parsedFolder.attachmentsByAttributeValue[attributeValue] || []).map(attachment => new AttachmentItem(attachment)) as FileTreeItem[]
+        const all = filesAsTreeItems.concat(attachmentsAsTreeItems)
+        return new GroupItem(
           attributeName,
           attributeValue,
-          res[attributeValue],
-          this.context.parsedFolder.attachmentsByAttributeValue[attributeValue] || []))
+          all) as FileTreeItem
+      })
+      .concat(nonMatchingFilesAsTreeItems)
+  }
+
+  private getGroupsByAttribute(attributeNames: string[]): FileTreeItem[] {
+    return this.getItemsByAttributeRec(this.context.parsedFolder.files, attributeNames)
   }
 
   private getGroupByGroups() {
@@ -169,16 +190,12 @@ export class FileHierarchicView implements vscode.TreeDataProvider<FileTreeItem>
     if (element) {
       if (element.type === FileItemType.Project) {
         const project = element.asProject()
-        const files = project.filesAsTreeItems() as FileTreeItem[]
-        const attachments = project.attachmentsAsTreeItems() as FileTreeItem[]
-        const all = files
-          .concat(attachments)
-        return all
+        return project.children
       }
       return []
     }
-    this.groups = this.getGroupByGroups()
-    return this.groups
+    this.items = this.getGroupByGroups()
+    return this.items
   }
 
 }

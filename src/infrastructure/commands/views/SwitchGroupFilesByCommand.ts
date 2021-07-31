@@ -7,7 +7,7 @@ import {
 } from '../../views/FileHierarchicView';
 
 class GroupByMenuOption {
-  constructor(public label: string, public groupByOption: string) { }
+  constructor(public label: string, public groupByOption: string, public isDone = false) { }
 }
 
 export class SwitchGroupFilesByCommand implements ICommand<string | null> {
@@ -16,13 +16,30 @@ export class SwitchGroupFilesByCommand implements ICommand<string | null> {
   get Id(): string { return "mw.filesView.groupFilesBy" }
 
   executeAsync = async (): Promise<string | null> => {
-    const options = this.context.parsedFolder.projectAttributes
-      .map((attribute: string) =>
-        new GroupByMenuOption(`By ${attribute}`, attribute)
-      )
-    const option = await vscode.window.showQuickPick(options, { canPickMany: false, placeHolder: "Group by" })
-    if (option) {
-      this.fileView.groupBy = option.groupByOption
+    let res: string[] = []
+    do {
+      const current = res.join(" > ")
+      let options = this.context.parsedFolder.projectAttributes
+        .filter(option => res.indexOf(option) < 0)
+        .map((attribute: string) =>
+          new GroupByMenuOption(`By ${current} > ${attribute}`, attribute)
+        )
+      if (res.length > 0) {
+        options = options.concat([new GroupByMenuOption(`[Done]: ${current}`, "", true)])
+      }
+      const option: GroupByMenuOption | undefined = await vscode.window.showQuickPick(options, {
+        canPickMany: false,
+        placeHolder: "Group by"
+      })
+
+      if (option && !option.isDone) {
+        res.push(option.groupByOption)
+      } else {
+        break
+      }
+    } while (true)
+    if (res.length > 0) {
+      this.fileView.groupBy = res
     }
     return ""
   }

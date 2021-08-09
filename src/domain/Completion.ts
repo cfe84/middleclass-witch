@@ -67,13 +67,9 @@ export class Completion {
     if (headerStart !== 0) {
       return false
     }
-    let lineCount = -1
-    let index = headerStart + eol.length
-    let newIndex = index
-    while ((newIndex = content.indexOf(eol, index)) > 0 && content.substr(index + eol.length, 3) !== "---") {
-      index = newIndex + eol.length
-      lineCount++
-    }
-    return lineNumber <= lineCount
+    let lines = content.split(eol)
+    const lastLineOfHeader = lines.indexOf("---", 1)
+    const headerIsClosed = lastLineOfHeader !== -1
+    return !headerIsClosed || lineNumber <= lastLineOfHeader
   }
 }

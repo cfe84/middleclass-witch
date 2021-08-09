@@ -88,14 +88,19 @@ Basic
 12. [x] Quick search with title
 13. [ ] Merge two notes
 14. [x] Group files by several layers
+15. [ ] Support attribute array for files
 
 Handle reference
 
 ## Known Issues
 
-None yet
+1. [x] Completion not working for attributes when there's a header
 
 ## Release Notes
+
+### 0.11.1
+
+Fix completion bug 1.
 
 ### 0.11.0
 

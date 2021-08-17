@@ -42,6 +42,8 @@ import { FileToggleCollapseCommand } from './commands/views/FileToggleCollapseCo
 import { OpenAtLineCommand } from './commands/OpenAtLineCommand'
 import { ConvertDateAttributesCommand } from './commands/ConvertDateAttributesCommand'
 import { OpenAttributeFolder } from './commands/OpenAttributeFolder'
+import { PomodoroStatusBar } from './statusbars/PomodoroStatusBar'
+import { StartPomodoroTask } from './commands/StartPomodoroTask'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -74,8 +76,10 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		templatesFolder: deps.path.join(rootFolder, ".mw", "templates")
 	}
 
+	const pomodoroStatusBar = new PomodoroStatusBar(deps, vscontext)
+
 	const commands: ICommand<string | null>[] = [
-		new SelectFileCommand(deps, context),
+		new AddDateToLineCommand(deps, context),
 		new ArchiveAttributeCommand(deps, context),
 		new ArchiveClickedAttributeCommand(deps, context),
 		new ConvertDateAttributesCommand(deps, context),
@@ -83,8 +87,6 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		new CreateNoteFromTemplate(deps, context),
 		new CreateNoteCommand(deps, context),
 		new DeleteNoteCommand(deps, context),
-		new AddDateToLineCommand(deps, context),
-		new ToggleTodoCommand(deps, context),
 		new MarkTodoAsCancelledCommand(deps, context),
 		new MarkTodoAsCompleteCommand(deps, context),
 		new MarkTodoAsDelegatedCommand(deps, context),
@@ -95,6 +97,9 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		new OpenExternalDocument(deps, context),
 		new OpenFileCommand(deps, context),
 		new OpenAtLineCommand(deps, context),
+		new SelectFileCommand(deps, context),
+		new StartPomodoroTask(deps, context, pomodoroStatusBar),
+		new ToggleTodoCommand(deps, context),
 	]
 	commands.forEach(command => {
 		let disposable = vscode.commands.registerCommand(command.Id, command.executeAsync);

@@ -89,7 +89,7 @@ Basic
 13. [ ] Merge two notes
 14. [x] Group files by several layers
 15. [ ] Support attribute array for files
-16. [ ] Pomodoro
+16. [-] Pomodoro
 
 Handle reference
 
@@ -99,6 +99,10 @@ Handle reference
 2. [x] Autocomplete dates are wrong
 
 ## Release Notes
+
+### 0.12
+
+16. First version of Pomodoro
 
 ### 0.11.2
 

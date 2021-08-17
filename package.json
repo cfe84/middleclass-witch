@@ -106,6 +106,16 @@
 				"category": "Middleclass Witch"
 			},
 			{
+				"command": "mw.openExternalDocument",
+				"title": "Open With Default App",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.openAttributeFolder",
+				"title": "Open attribute folder",
+				"category": "Middleclass Witch"
+			},
+			{
 				"command": "mw.todoView.groupBy",
 				"title": "Group by",
 				"category": "Middleclass Witch"
@@ -121,13 +131,8 @@
 				"category": "Middleclass Witch"
 			},
 			{
-				"command": "mw.openExternalDocument",
-				"title": "Open With Default App",
-				"category": "Middleclass Witch"
-			},
-			{
-				"command": "mw.openAttributeFolder",
-				"title": "Open attribute folder",
+				"command": "mw.todoView.startPomodoroTask",
+				"title": "Start pomodoro",
 				"category": "Middleclass Witch"
 			},
 			{
@@ -201,16 +206,6 @@
 			]
 		},
 		"menus": {
-			"commandPalette": [
-				{
-					"command": "mw.openExternalDocument",
-					"when": "false"
-				},
-				{
-					"command": "mw.openAttributeFolder",
-					"when": "false"
-				}
-			],
 			"explorer/context": [],
 			"view/title": [
 				{
@@ -242,23 +237,31 @@
 			"view/item/context": [
 				{
 					"command": "mw.archiveClickedAttribute",
-					"when": "view == mw.filesHierarchy && viewItem == group"
+					"when": "view == mw.filesHierarchy && viewItem == group",
+					"group": "y-archive"
 				},
 				{
 					"command": "mw.consolidateClickedAttribute",
-					"when": "view == mw.filesHierarchy && viewItem == group"
-				},
-				{
-					"command": "mw.deleteNote",
-					"when": "view == mw.filesHierarchy && viewItem == file"
-				},
-				{
-					"command": "mw.openExternalDocument",
-					"group": "view == mw.filesHierarchy && viewItem == attachment"
+					"when": "view == mw.filesHierarchy && viewItem == group",
+					"group": "y-archive"
 				},
 				{
 					"command": "mw.openAttributeFolder",
-					"group": "view == mw.filesHierarchy && viewItem == group"
+					"when": "view == mw.filesHierarchy && viewItem == group",
+					"group": "a-open"
+				},
+				{
+					"command": "mw.deleteNote",
+					"when": "view == mw.filesHierarchy && viewItem == file",
+					"group": "z-delete"
+				},
+				{
+					"command": "mw.openExternalDocument",
+					"when": "view == mw.filesHierarchy && viewItem == attachment"
+				},
+				{
+					"command": "mw.todoView.startPomodoroTask",
+					"when": "view == mw.todoHierarchy && viewItem == todo"
 				}
 			]
 		},

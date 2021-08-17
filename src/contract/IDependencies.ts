@@ -9,5 +9,5 @@ export interface IDependencies {
   date: IDate,
   path: IPath,
   fs: IFs,
-  uiSelector: IUISelector,
+  uiSelector: IUISelector
 }

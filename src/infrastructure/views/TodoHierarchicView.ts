@@ -44,6 +44,7 @@ const statusToIcon = (status: TodoStatus): string => {
 };
 
 class Group extends GroupOrTodo {
+  contextValue = "group"
   type: ItemType = ItemType.Group;
   constructor(public name: string, public todos: TodoItem[]) {
     super(name);
@@ -77,9 +78,10 @@ const mapPriority = (
       )[0] as string) || ""
     : "";
 
-class TodoTreeItem extends GroupOrTodo {
+export class TodoTreeItem extends GroupOrTodo {
+  contextValue = "todo"
   type: ItemType = ItemType.Todo;
-  constructor(private todo: TodoItem) {
+  constructor(public todo: TodoItem) {
     super(
       statusToIcon(todo.status) + mapPriority(todo.attributes) + " " + todo.text
     );

@@ -1,4 +1,5 @@
 import { IDate } from "../contract/IDate";
+import { DateTime } from "luxon"
 
 export class StdDate implements IDate {
   thisYearAsYString(): string {
@@ -6,11 +7,12 @@ export class StdDate implements IDate {
     return date.getFullYear().toString();
   }
   todayAsYMDString(): string {
-    const date = new Date()
-    return date.toISOString().substr(0, 10)
+    const date = DateTime.now()
+    return date.toISODate()
   }
   nowAsYMDString(): string {
-    const date = new Date()
-    return date.toISOString().substr(0, 19).replace(/[T:]/g, "-")
+
+    const date = DateTime.now()
+    return date.toISODate() + "-" + date.toISOTime().substr(0, 5)
   }
 }

@@ -89,14 +89,20 @@ Basic
 13. [ ] Merge two notes
 14. [x] Group files by several layers
 15. [ ] Support attribute array for files
+16. [ ] Pomodoro
 
 Handle reference
 
 ## Known Issues
 
 1. [x] Completion not working for attributes when there's a header
+2. [x] Autocomplete dates are wrong
 
 ## Release Notes
+
+### 0.11.2
+
+Fixed 2.
 
 ### 0.11.1
 

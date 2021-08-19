@@ -2,7 +2,7 @@ import should from "should"
 import td from "testdouble"
 import { Pomodoro, sleep } from "../src/domain/Pomodoro"
 
-describe("Pomodoro", async function () {
+describe.skip("Pomodoro", async function () {
   const test = async function (pause: boolean) {
     //given
     const length = 4

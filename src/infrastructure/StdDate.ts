@@ -13,6 +13,7 @@ export class StdDate implements IDate {
   nowAsYMDString(): string {
 
     const date = DateTime.now()
-    return date.toISODate() + "-" + date.toISOTime().substr(0, 5)
+    return date.toISODate() + "-"
+      + date.toISOTime().substr(0, 5).replace(":", "-")
   }
 }

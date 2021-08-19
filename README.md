@@ -97,8 +97,13 @@ Handle reference
 
 1. [x] Completion not working for attributes when there's a header
 2. [x] Autocomplete dates are wrong
+3. [x] Std date is returning : for dates.
 
 ## Release Notes
+
+### 0.12.1
+
+Fix : in dates.
 
 ### 0.12
 

@@ -13,11 +13,11 @@ export class FilePropertiesWorkspaceSymbolsProvider implements WorkspaceSymbolPr
     const matches = this.ops.searchFiles(query)
     const mapMatchToSymbol = (match: FileMatch): SymbolInformation => ({
       containerName: match.file.fileProperties.name,
-      kind: match.matching === Matching.Name
-        ? SymbolKind.File
-        : match.attributeName === "title"
-          ? SymbolKind.Class
-          : SymbolKind.Property,
+      kind: match.matching === Matching.Name ? SymbolKind.File
+        : match.matching === Matching.Todo ? SymbolKind.Interface
+          : match.attributeName === "stream" || match.attributeName === "project" ? SymbolKind.Namespace
+            : match.attributeName === "title" ? SymbolKind.Class
+              : SymbolKind.Property,
       location: new Location(vscode.Uri.file(match.file.fileProperties.path), new vscode.Position(1, 0)),
       name: `${match.attributeName}: ${match.attributeValue}`,
     })

@@ -4,11 +4,13 @@ import { ParsedFile } from "./ParsedFile";
 
 export enum Matching {
   Name = 1,
-  Attribute = 2
+  Attribute = 2,
+  Todo = 3
 }
 
 export interface FileMatch {
   file: ParsedFile,
+  line: number,
   matching: Matching,
   attributeName: string,
   attributeValue: string
@@ -35,14 +37,18 @@ export class FileOperations {
 
   searchFiles(search: string): FileMatch[] {
     const files = this.context.parsedFolder.files
+    const todos = this.context.parsedFolder.todos
+
     const nameMatches = files
       .filter(file => this.matchString(search, file.fileProperties.name))
       .map(file => ({
         file,
         matching: Matching.Name,
+        line: -1,
         attributeName: "filename",
         attributeValue: file.fileProperties.name
       }) as FileMatch)
+
     const attributeMatches = files
       .map(file => {
         const attributes = Object.keys(file.fileProperties.attributes)
@@ -51,13 +57,28 @@ export class FileOperations {
           file,
           matching: Matching.Attribute,
           attributeName,
+          line: -1,
           attributeValue: file.fileProperties.attributes[attributeName]
         }) as FileMatch)
       })
       .reduce((prev, curr) => {
         return prev.concat(curr)
       }, [] as FileMatch[])
-    return nameMatches.concat(attributeMatches)
+
+    const todoMatches: FileMatch[] = files
+      .map(file => {
+        const matchingTodos = file.todos.filter(todo => this.matchString(search, todo.text))
+        return matchingTodos.map(todo => ({ file, todo }))
+      })
+      .reduce((matches, match) => matches.concat(match))
+      .map(match => ({
+        attributeName: "todo",
+        attributeValue: match.todo.text,
+        file: match.file,
+        line: match.todo.line || -1,
+        matching: Matching.Todo
+      }))
+    return nameMatches.concat(attributeMatches).concat(todoMatches)
   }
 
   archive(attributeName: string, attributeValue: string) {

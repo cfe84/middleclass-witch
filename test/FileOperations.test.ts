@@ -7,14 +7,15 @@ import { IDictionary } from "../src/domain/IDictionary"
 import { ParsedFile } from "../src/domain/ParsedFile"
 
 import { FileMatch, FileOperations, Matching } from "../src/domain/FileOperations"
+import { TodoItem, TodoStatus } from "../src/domain/TodoItem"
 
-const makeFakeFile = (name: string, attributes: IDictionary<string>): ParsedFile => ({
+const makeFakeFile = (name: string, attributes: IDictionary<string>, todos: TodoItem[] = []): ParsedFile => ({
   fileProperties: {
     attributes,
     name,
     path: `path(${name})`
   },
-  todos: []
+  todos: todos
 })
 
 describe("File operations", function () {
@@ -88,14 +89,15 @@ describe("File operations", function () {
     })
   })
 
-  const testFileMatch = (finds: FileMatch[], attributeName: string) => (file: ParsedFile) => {
+  const testFileMatch = (finds: FileMatch[], attributeName: string, line = -1, todoText: string = "") => (file: ParsedFile) => {
     should(TestUtils.findObj(finds, {
       attributeName: attributeName,
-      attributeValue: attributeName === "filename"
-        ? file.fileProperties.name
-        : file.fileProperties.attributes[attributeName],
+      attributeValue: attributeName === "filename" ? file.fileProperties.name
+        : attributeName === "todo" ? todoText
+          : file.fileProperties.attributes[attributeName],
       file: file,
-      matching: attributeName === "filename" ? Matching.Name : Matching.Attribute
+      line,
+      matching: attributeName === "filename" ? Matching.Name : attributeName === "todo" ? Matching.Todo : Matching.Attribute
     })).not.be.undefined()
   }
 
@@ -134,5 +136,41 @@ describe("File operations", function () {
       match.forEach(testFileMatch(finds, "filename"))
     })
     it("finds partial matches")
+  })
+
+  context("search todos", function () {
+    // given
+    const ctx = fakeContext()
+    const deps = makeFakeDeps()
+
+    const todo1 = { text: "Text of todo test1", attributes: {}, file: "", status: TodoStatus.InProgress, line: 10 }
+    const todo2 = { text: "The other todo is test2", attributes: {}, file: "", status: TodoStatus.Complete, line: 12 }
+
+    const file1 = makeFakeFile("", {}, [todo1])
+    const file2 = makeFakeFile("", {}, [todo2])
+
+    ctx.parsedFolder.files = [file1, file2]
+    // ctx.parsedFolder.todos = [todo1, todo2]
+
+    const ops = new FileOperations(deps, ctx)
+
+    it("finds full word", () => {
+      const finds = ops.searchFiles("todo test1")
+      should(finds).have.length(1)
+      testFileMatch(finds, "todo", 10, todo1.text)(file1)
+    })
+
+    it("finds partial word", function () {
+      const finds = ops.searchFiles("tes")
+      should(finds).have.length(2)
+      testFileMatch(finds, "todo", 10, todo1.text)(file1)
+      testFileMatch(finds, "todo", 12, todo2.text)(file2)
+    })
+
+    it("searches terms separated in todo text", () => {
+      const finds = ops.searchFiles("teToTe1")
+      should(finds).have.length(1)
+      testFileMatch(finds, "todo", 10, todo1.text)(file1)
+    })
   })
 })

@@ -90,6 +90,7 @@ Basic
 14. [x] Group files by several layers
 15. [ ] Support attribute array for files
 16. [-] Pomodoro
+17. [x] Search for todos
 
 Handle reference
 
@@ -100,6 +101,10 @@ Handle reference
 3. [x] Std date is returning : for dates.
 
 ## Release Notes
+
+### 0.13
+
+Built 17: Search for todos in symbols
 
 ### 0.12.1
 

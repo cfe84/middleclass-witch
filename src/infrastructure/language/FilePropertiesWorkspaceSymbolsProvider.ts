@@ -18,7 +18,8 @@ export class FilePropertiesWorkspaceSymbolsProvider implements WorkspaceSymbolPr
           : match.attributeName === "stream" || match.attributeName === "project" ? SymbolKind.Namespace
             : match.attributeName === "title" ? SymbolKind.Class
               : SymbolKind.Property,
-      location: new Location(vscode.Uri.file(match.file.fileProperties.path), new vscode.Position(1, 0)),
+      location: new Location(vscode.Uri.file(match.file.fileProperties.path),
+        new vscode.Position(match.line >= 0 ? match.line : 1, 0)),
       name: `${match.attributeName}: ${match.attributeValue}`,
     })
     return matches.map(mapMatchToSymbol)

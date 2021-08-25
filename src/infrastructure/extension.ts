@@ -44,6 +44,7 @@ import { ConvertDateAttributesCommand } from './commands/ConvertDateAttributesCo
 import { OpenAttributeFolder } from './commands/OpenAttributeFolder'
 import { PomodoroStatusBar } from './statusbars/PomodoroStatusBar'
 import { StartPomodoroTask } from './commands/StartPomodoroTask'
+import { FilterFilesByAttributeCommand } from './commands/views/FilterFilesByAttributeCommand'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -121,7 +122,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 	const viewCommands = [
 		new SwitchGroupByCommand(deps, context, todosView),
 		new SwitchShowHideCommand(deps, context, todosView),
-		new SwitchSortByCommand(deps, context, todosView)
+		new SwitchSortByCommand(deps, context, todosView),
 	]
 	viewCommands.forEach(command => {
 		let disposable = vscode.commands.registerCommand(command.Id, command.executeAsync);
@@ -132,7 +133,8 @@ export function activate(vscontext: vscode.ExtensionContext) {
 	const filesView = new FileHierarchicView(deps, context)
 	const fileCommands = [
 		new SwitchGroupFilesByCommand(deps, context, filesView),
-		new FileToggleCollapseCommand(deps, context, filesView)
+		new FileToggleCollapseCommand(deps, context, filesView),
+		new FilterFilesByAttributeCommand(deps, context, filesView),
 	]
 	fileCommands.forEach(command => {
 		let disposable = vscode.commands.registerCommand(command.Id, command.executeAsync);

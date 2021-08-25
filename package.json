@@ -137,12 +137,17 @@
 			},
 			{
 				"command": "mw.filesView.groupFilesBy",
-				"title": "Group files",
+				"title": "Group",
+				"category": "Middleclass Witch"
+			},
+			{
+				"command": "mw.filesView.filterBy",
+				"title": "Filter",
 				"category": "Middleclass Witch"
 			},
 			{
 				"command": "mw.filesView.toggleCollapse",
-				"title": "Collapse files",
+				"title": "Collapse",
 				"category": "Middleclass Witch"
 			}
 		],
@@ -230,6 +235,11 @@
 				},
 				{
 					"command": "mw.filesView.toggleCollapse",
+					"when": "view == mw.filesHierarchy",
+					"group": "navigation"
+				},
+				{
+					"command": "mw.filesView.filterBy",
 					"when": "view == mw.filesHierarchy",
 					"group": "navigation"
 				}

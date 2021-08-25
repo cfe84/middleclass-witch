@@ -95,12 +95,14 @@ export class FileItem extends FileTreeItem {
 }
 
 const STORAGEKEY_GROUPBY = "mw.fileView.groupBy"
+const STORAGEKEY_FILTERBY = "mw.fileView.filterBy"
 
 export class FileHierarchicView implements vscode.TreeDataProvider<FileTreeItem> {
   private items: FileTreeItem[] | undefined
   private collapsed: boolean = false
   constructor(private deps: IDependencies, private context: IContext) {
     this._groupBy = context.storage ? context.storage.get(STORAGEKEY_GROUPBY, ["project"]) : ["project"]
+    this._filterBy = context.storage ? context.storage.get(STORAGEKEY_FILTERBY, {}) : {}
     this.migrateV11();
   }
 
@@ -124,6 +126,33 @@ export class FileHierarchicView implements vscode.TreeDataProvider<FileTreeItem>
     this._groupBy = value
     this.context.storage?.update(STORAGEKEY_GROUPBY, value)
     this.refresh()
+  }
+
+  private _filterBy: IDictionary<(string | null)[]>
+  public get filterBy() { return this._filterBy }
+  public setFilter(attributeName: string, values: (string | null)[]) {
+    if (values.length === 0) {
+      delete this._filterBy[attributeName]
+    } else {
+      this._filterBy[attributeName] = values
+    }
+    this.context.storage?.update(STORAGEKEY_FILTERBY, this._filterBy)
+    this.refresh()
+  }
+
+  private getFilteredFiles(): ParsedFile[] {
+    return this.context.parsedFolder.files
+      .filter(file => {
+        const fileAttributes = file.fileProperties.attributes
+        const nonMatchingAttributes = Object.keys(this._filterBy).filter(filteredAttribute => {
+          const filteredValues = this._filterBy[filteredAttribute]
+          if (!fileAttributes[filteredAttribute] && filteredValues.indexOf(null) >= 0) {
+            return false
+          }
+          return filteredValues.indexOf(`${fileAttributes[filteredAttribute]}`) < 0
+        })
+        return nonMatchingAttributes.length === 0
+      })
   }
 
   private onDidChangeTreeDataEventEmitter: vscode.EventEmitter<FileTreeItem | undefined> = new vscode.EventEmitter<FileTreeItem | undefined>();
@@ -179,7 +208,8 @@ export class FileHierarchicView implements vscode.TreeDataProvider<FileTreeItem>
   }
 
   private getGroupsByAttribute(attributeNames: string[]): FileTreeItem[] {
-    return this.getItemsByAttributeRec(this.context.parsedFolder.files, attributeNames)
+    const files = this.getFilteredFiles()
+    return this.getItemsByAttributeRec(files, attributeNames)
   }
 
   private getGroupByGroups() {

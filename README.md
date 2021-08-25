@@ -91,6 +91,7 @@ Basic
 15. [ ] Support attribute array for files
 16. [-] Pomodoro
 17. [x] Search for todos
+18. [x] Filter based on attributes.
 
 Handle reference
 
@@ -101,6 +102,10 @@ Handle reference
 3. [x] Std date is returning : for dates.
 
 ## Release Notes
+
+### 0.14
+
+Built 18: Filter based on attributes
 
 ### 0.13
 

@@ -103,7 +103,11 @@ Handle reference
 
 ## Release Notes
 
-### 0.14
+### 0.16
+
+Loading prefs from vscode settings instead of a file
+
+### 0.15
 
 Built 18: Filter based on attributes
 

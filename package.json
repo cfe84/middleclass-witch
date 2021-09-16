@@ -14,6 +14,26 @@
 	],
 	"main": "./out/infrastructure/extension.js",
 	"contributes": {
+		"configuration": {
+			"title": "Middleclass Witch",
+			"properties": {
+				"mw.folders.current": {
+					"type": "string",
+					"default": "current",
+					"description": "Folder for current notes."
+				},
+				"mw.folders.archive": {
+					"type": "string",
+					"default": "archive",
+					"description": "Folder where to archive notes."
+				},
+				"mw.folders.templates": {
+					"type": "string",
+					"default": ".mw/templates",
+					"description": "Where to find templates"
+				}
+			}
+		},
 		"commands": [
 			{
 				"command": "mw.selectFile",

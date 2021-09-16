@@ -17,7 +17,6 @@ import { ArchiveAttributeCommand } from './commands/ArchiveAttributeCommand'
 import { ArchiveClickedAttributeCommand } from './commands/ArchiveClickedAttributeCommand'
 import { CreateNoteCommand } from './commands/CreateNoteCommand'
 import { CreateNoteFromTemplate } from './commands/CreateNoteFromTemplate'
-import { ConfigFileLoader } from '../domain/ConfigFileLoader'
 import { FileHierarchicView } from './views/FileHierarchicView'
 import { FolderParser } from '../domain/FolderParser'
 import { MarkTodoAsCancelledCommand } from './commands/MarkTodoAsCancelledCommand'
@@ -45,6 +44,7 @@ import { OpenAttributeFolder } from './commands/OpenAttributeFolder'
 import { PomodoroStatusBar } from './statusbars/PomodoroStatusBar'
 import { StartPomodoroTask } from './commands/StartPomodoroTask'
 import { FilterFilesByAttributeCommand } from './commands/views/FilterFilesByAttributeCommand'
+import { VsCodeConfigLoader } from './VsCodeConfigLoader'
 
 export function activate(vscontext: vscode.ExtensionContext) {
 	const logger = new ConsoleLogger()
@@ -63,10 +63,14 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		return null
 	}
 	const rootFolder = vscode.workspace.workspaceFolders[0].uri.fsPath
-	const configFile = deps.path.join(rootFolder, ".mw", "config.yml")
-	const configLoader = new ConfigFileLoader(deps)
-	const config = configLoader.loadConfig(configFile)
+	const configLoader = new VsCodeConfigLoader()
+	const config = configLoader.loadConfig()
 	const currentFolder = deps.path.join(rootFolder, config.folders.current)
+	const templatesFolder = deps.path.join(rootFolder, config.folders.templates)
+	if (!fs.existsSync(templatesFolder)) {
+		fs.mkdirSync(templatesFolder, { recursive: true })
+		fs.writeFileSync(path.join(templatesFolder, "default.md"), "")
+	}
 
 	const context: IContext = {
 		rootFolder,
@@ -74,7 +78,7 @@ export function activate(vscontext: vscode.ExtensionContext) {
 		config: config || undefined,
 		parsedFolder: { todos: [], attributes: [], attributeValues: {}, files: [], projectAttributes: [], attachmentsByAttributeValue: {} },
 		storage: vscontext.globalState,
-		templatesFolder: deps.path.join(rootFolder, ".mw", "templates")
+		templatesFolder
 	}
 
 	const pomodoroStatusBar = new PomodoroStatusBar(deps, vscontext)

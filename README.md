@@ -103,7 +103,7 @@ Handle reference
 
 ## Release Notes
 
-### 0.16
+### 0.16.1
 
 Loading prefs from vscode settings instead of a file
 

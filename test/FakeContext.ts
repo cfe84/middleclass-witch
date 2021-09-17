@@ -15,6 +15,7 @@ export function fakeContext(): IContext {
       folders: {
         archive: "ARCHIVE",
         current: "PROJECTS",
+        templates: "TEMPLATES"
       }
     },
     templatesFolder: "ROOT|.pw|templates"

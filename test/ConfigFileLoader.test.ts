@@ -14,8 +14,8 @@ describe("ConfigFileLoader", () => {
     td.when(deps.fs.existsSync(filename)).thenReturn(false)
 
     // when
-    const configFileLoader = new ConfigFileLoader(deps)
-    const res = configFileLoader.loadConfig(filename)
+    const configFileLoader = new ConfigFileLoader(deps, filename)
+    const res = configFileLoader.loadConfig()
 
     // then 
     it("doesn't brake", () => {
@@ -37,8 +37,8 @@ describe("ConfigFileLoader", () => {
     td.when(deps.fs.readFileSync(filename)).thenReturn(Buffer.from(configFile))
 
     // when
-    const configLoader = new ConfigFileLoader(deps)
-    const config = configLoader.loadConfig(filename) as IConfig
+    const configLoader = new ConfigFileLoader(deps, filename)
+    const config = configLoader.loadConfig() as IConfig
 
     // then
     it("Loads folders without quotes", () => { should(config.folders.current).eql("PROJECTS__") })

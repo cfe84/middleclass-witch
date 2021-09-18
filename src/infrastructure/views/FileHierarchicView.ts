@@ -64,11 +64,26 @@ function or(a: any, b: string) {
   return `${a}`
 }
 
+function getIconForFile(file: ParsedFile) {
+  if (file.fileProperties.addAttributes) {
+    return "⚙️"
+  }
+  return "📜"
+}
+
+function getFileName(file: ParsedFile) {
+  const name = or(file.fileProperties.attributes["title"], file.fileProperties.name)
+  if (file.fileProperties.addAttributes) {
+    return `Attribute Settings (${name})`
+  }
+  return name
+}
+
 export class FileItem extends FileTreeItem {
   contextValue = "file"
   type: FileItemType = FileItemType.File
   constructor(public file: ParsedFile) {
-    super("📜 " + or(file.fileProperties.attributes["title"], file.fileProperties.name))
+    super(getIconForFile(file) + " " + getFileName(file))
 
     const mapAttributeName = (attributeName: string): string =>
       attributeName === "selected" ? "📌"

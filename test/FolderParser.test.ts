@@ -53,9 +53,11 @@ describe("FolderTodoParser", () => {
     td.when(deps.fs.lstatSync("ROOT|PROJECTS")).thenReturn({ isDirectory: () => true })
     td.when(deps.fs.readdirSync("ROOT|PROJECTS")).thenReturn(["Something"])
     td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something")).thenReturn({ isDirectory: () => true })
-    td.when(deps.fs.readdirSync("ROOT|PROJECTS|Something")).thenReturn(["file2.md", "file.ppt"])
+    td.when(deps.fs.readdirSync("ROOT|PROJECTS|Something")).thenReturn(["file2.md", "attribute.md", "file.ppt"])
     td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something|file.ppt")).thenReturn({ isDirectory: () => false })
     td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something|file2.md")).thenReturn({ isDirectory: () => false })
+    td.when(deps.fs.lstatSync("ROOT|PROJECTS|Something|attribute.md")).thenReturn({ isDirectory: () => false })
+    td.when(deps.fs.readFileSync("ROOT|PROJECTS|Something|attribute.md")).thenReturn(Buffer.from(`attribute`))
     td.when(deps.fs.readFileSync("ROOT|PROJECTS|Something|file2.md")).thenReturn(Buffer.from(`file2`))
     const file2Todos = [
       makeTodo({ "assignee": "Leah", "booleanAttribute": true }),
@@ -73,9 +75,21 @@ describe("FolderTodoParser", () => {
     td.when(fakeFileParser.findTodos("file2", "ROOT|PROJECTS|Something|file2.md")).thenReturn(file2Todos)
     td.when(fakeFileParser.getFileProperties("file2", "ROOT|PROJECTS|Something|file2.md")).thenReturn(file2Properties)
 
+    const attributeProperties: FileProperties = {
+      attributes: {
+        "project": "pj1",
+        "projectAttribute": "projectValue",
+        "addAttributes": { "pj1-attribute": "yes" }
+      },
+      path: "ROOT|PROJECTS|Something|attribute.md",
+      name: "attribute.md",
+    }
+    td.when(fakeFileParser.findTodos("attribute", "ROOT|PROJECTS|Something|attribute.md")).thenReturn([])
+    td.when(fakeFileParser.getFileProperties("attribute", "ROOT|PROJECTS|Something|attribute.md")).thenReturn(attributeProperties)
+
     // when
     const parser = new FolderParser(deps, ctx, fakeFileParser)
-    const parsedFolder = parser.parseCurrentFolder(rootFolder)
+    const parsedFolder = parser.parseFolder(rootFolder)
     const todos = parsedFolder.todos
 
     // then
@@ -116,13 +130,20 @@ describe("FolderTodoParser", () => {
       should(parsedFolder.attributeValues["assignee"]).containEql("Louis")
       should(parsedFolder.attributeValues["project"]).containEql("pj1")
     })
-    it("loads files", () => {
+    it("loads files, and apply attribute properties", () => {
       const file = TestUtils.findObj(parsedFolder.files, {
         fileProperties: { name: "file2.md" }
       }) as ParsedFile
       should(file).not.be.undefined()
       should(file.fileProperties.path).deepEqual("ROOT|PROJECTS|Something|file2.md")
+      should(TestUtils.objectEql({
+        "assignee": "Louis",
+        "projectAttribute": "projectValue",
+        "project": "pj1",
+        "pj1-attribute": "yes"
+      }, file.fileProperties.attributes)).be.true()
     })
+
     it("replicates attributes from file to todo", () => {
       const todo = TestUtils.findObj(parsedFolder.todos, { attributes: { project: "Something" } }) as TodoItem
       should(todo.attributes["projectAttribute"]).eql("projectValue")
@@ -134,6 +155,13 @@ describe("FolderTodoParser", () => {
         name: "file.ppt",
         path: "ROOT|PROJECTS|Something|file.ppt"
       })).not.undefined()
+    })
+
+    it("marks files that add attributes", () => {
+      const file = TestUtils.findObj(parsedFolder.files, {
+        fileProperties: { name: "attribute.md" }
+      }) as ParsedFile
+      should(file.fileProperties.addAttributes).be.true()
     })
   })
 
@@ -149,7 +177,7 @@ describe("FolderTodoParser", () => {
 
     // when
     const parser = new FolderParser(deps, ctx)
-    const todos = parser.parseCurrentFolder(rootFolder).todos
+    const todos = parser.parseFolder(rootFolder).todos
 
     // then
     it("should load empty todos", () => should(todos).have.length(0))

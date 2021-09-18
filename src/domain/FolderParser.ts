@@ -6,6 +6,9 @@ import { FileParser } from "./FileParser";
 import { ParsedFile } from "./ParsedFile";
 import { ParsedFolder } from "./ParsedFolder";
 import { Attachment } from "./Attachment";
+import { FileAttributes } from "./FileProperties";
+
+const ADD_ATTRIBUTES_ATTRIBUTE_NAME = "addAttributes"
 
 interface Attributes {
   attributes: IDictionary<string[]>
@@ -106,8 +109,29 @@ export class FolderParser {
       }, [])
   }
 
-  public parseCurrentFolder(folder: string): ParsedFolder {
+  private applyAddAttributes(files: ParsedFile[]) {
+    for (let file of files) {
+      const attributes = file.fileProperties.attributes
+      const addAttributes = attributes[ADD_ATTRIBUTES_ATTRIBUTE_NAME] as FileAttributes
+      if (!addAttributes || typeof (addAttributes) !== "object") {
+        continue
+      }
+      file.fileProperties.addAttributes = true
+      const desiredAttributes = Object.keys(attributes).filter(attribute => attribute !== ADD_ATTRIBUTES_ATTRIBUTE_NAME)
+      const fileMatches = (f: ParsedFile) => !desiredAttributes.find(attributeName => {
+        const desiredValue = attributes[attributeName]
+        return f.fileProperties.attributes[attributeName] !== desiredValue
+      })
+      files.filter(fileMatches).forEach(file => {
+        Object.keys(addAttributes)
+          .forEach(attributeName => file.fileProperties.attributes[attributeName] = addAttributes[attributeName])
+      })
+    }
+  }
+
+  public parseFolder(folder: string): ParsedFolder {
     const files = this.findFolderFiles(folder)
+    this.applyAddAttributes(files)
     const allAttributes = this.listAttributes(files);
     const attributes: IDictionary<string[]> = allAttributes.attributes
     const projectAttributes: IDictionary<string[]> = allAttributes.projectAttributes
@@ -120,9 +144,6 @@ export class FolderParser {
       attributes: Object.keys(attributes).sort((a, b) => a.localeCompare(b)),
       attributeValues: attributes,
       projectAttributes: Object.keys(projectAttributes)
-    }
-    if (!attributes["project"]) {
-      attributes["project"] = []
     }
     if (!attributes["selected"]) {
       attributes["selected"] = []

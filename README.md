@@ -16,6 +16,19 @@ Middleclass Witch instruments an opinionated workflow, which central aspect is t
 
 PW also instruments the notion of recurrences: those meetings and cadences that happen regularly and don't really categorize as project, and which are more convenient to keep together (say, 1:1 meetings, planning sessions, monthly business reviews, etc.)
 
+### Attributes files
+
+MW supports propagating attributes across several files at once. That is done by creating a file with all attributes you want to match, then adding an `addAttributes` property:
+
+```yml
+project: My project
+stream: code
+addAttributes:
+  status: Active
+```
+
+This header would add an "active" attribute to any file with attributes project = My project and stream = code.
+
 ### Todos
 
 Notes shall be taken in markdown. It is very frequent that you define todos while taking notes. When you finally admit that the distinction between notes and todos is pretty fuzzy, merging both together seems to make sense. Middleclass Witch offers a robust way to organize these, using projects as the background organization layer, adding to that statuses, a process of selection for creating a todo-list for the day, and flexible attributes.
@@ -78,7 +91,7 @@ Basic
 2. [x] Project view
 3. [x] Header autocomplete
 4. [x] Quick create note
-5. [ ] Handle attribute property file     
+5. [-] Handle attribute property file     
 6. [x] Consolidate attributes
 7. [x] Handle archive based on attributes
 8. [x] Limit the folders being parsed to current
@@ -102,6 +115,11 @@ Handle reference
 3. [x] Std date is returning : for dates.
 
 ## Release Notes
+
+### 0.17
+
+Support for some attributes file.
+
 
 ### 0.16.1
 

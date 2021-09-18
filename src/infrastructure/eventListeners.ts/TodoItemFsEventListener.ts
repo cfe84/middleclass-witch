@@ -11,7 +11,7 @@ export class TodoItemFsEventListener {
   private refreshTodos() {
     if (Date.now() > this.lastUpdate + 100) {
       this.lastUpdate = Date.now()
-      this.ctx.parsedFolder = this.parser.parseCurrentFolder(this.ctx.currentFolder)
+      this.ctx.parsedFolder = this.parser.parseFolder(this.ctx.currentFolder)
       this.fileDidChange.forEach(callback => callback())
     }
   }

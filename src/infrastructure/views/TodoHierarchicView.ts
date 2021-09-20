@@ -170,6 +170,7 @@ export interface SortByConfig {
 
 const STORAGEKEY_SHOWSELECTEDONTOP = "mw.todoView.showSelectedOnTop";
 const STORAGEKEY_SHOWDUEONTOP = "mw.todoView.showDueOnTop";
+const STORAGEKEY_SHOWSELECTEDDUE = "mw.todoView.showSelectedDue";
 const STORAGEKEY_SHOWCOMPLETED = "mw.todoView.showCompleted";
 const STORAGEKEY_SHOWCANCELED = "mw.todoView.showCanceled";
 const STORAGEKEY_SHOWEMPTY = "mw.todoView.showEmpty";
@@ -185,6 +186,9 @@ export class TodoHierarchicView
       : true;
     this._showDueOnTop = context.storage
       ? context.storage.get(STORAGEKEY_SHOWDUEONTOP, true)
+      : true;
+    this._showSelectedDue = context.storage
+      ? context.storage.get(STORAGEKEY_SHOWSELECTEDDUE, false)
       : true;
     this._showCompleted = context.storage
       ? context.storage.get(STORAGEKEY_SHOWCOMPLETED, true)
@@ -215,6 +219,7 @@ export class TodoHierarchicView
   private _sortBy: SortByConfig;
   private _showSelectedOnTop: boolean;
   private _showDueOnTop: boolean;
+  private _showSelectedDue: boolean;
   private _showCompleted: boolean;
   private _showCanceled: boolean;
   private _showEmpty: boolean;
@@ -243,6 +248,7 @@ export class TodoHierarchicView
   public get showSelectedOnTop(): boolean {
     return this._showSelectedOnTop;
   }
+
   public set showDueOnTop(value: boolean) {
     this._showDueOnTop = value;
     this.context.storage?.update(STORAGEKEY_SHOWDUEONTOP, value);
@@ -250,6 +256,15 @@ export class TodoHierarchicView
   }
   public get showDueOnTop(): boolean {
     return this._showDueOnTop;
+  }
+
+  public get showSelectedDue(): boolean {
+    return this._showSelectedDue;
+  }
+  public set showSelectedDue(value: boolean) {
+    this._showSelectedDue = value;
+    this.context.storage?.update(STORAGEKEY_SHOWSELECTEDDUE, value);
+    this.refresh();
   }
 
   public set showCompleted(value: boolean) {
@@ -379,12 +394,13 @@ export class TodoHierarchicView
     return new Group("Selected tasks", this.groomTodos(selectedTodos));
   }
   private getDueGroup(): Group {
+    const showSelectedDue = this._showSelectedDue
     const dueDateAttributes = ["due", "duedate", "when", "expire", "expires"];
     const now = DateTime.now();
     const allTodos = this.getAllTodosIncludingSubs(
       this.context.parsedFolder.todos
     );
-    const todosWithDueDate = allTodos.filter(
+    const todosWithPastDueDate = allTodos.filter(
       (todo) =>
         todo.attributes &&
         dueDateAttributes.find((attribute) => {
@@ -400,14 +416,14 @@ export class TodoHierarchicView
             if (date.startOf("day") < now.endOf("day")) {
               this.deps.logger.log(`Now: ${now}, Due: ${date}`);
             }
-            return date < now;
+            return date < now && (showSelectedDue || !todo.attributes["selected"]);
           } catch (err) {
             this.deps.logger.error(`Error while parsing date: ${err}`);
             return false;
           }
         })
     );
-    return new Group("Due", todosWithDueDate);
+    return new Group("Due", todosWithPastDueDate);
   }
 
   private getGroupsByStatus(): Group[] {

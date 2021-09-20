@@ -116,6 +116,10 @@ Handle reference
 
 ## Release Notes
 
+### 0.18
+
+Show/hide due todos that are already selected
+
 ### 0.17
 
 Support for some attributes file.

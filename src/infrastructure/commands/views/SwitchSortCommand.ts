@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { ICommand } from './ICommand';
-import { IDependencies } from '../../contract/IDependencies';
-import { IContext } from '../../contract/IContext';
-import { TodoHierarchicView, SortByOption, SortByConfig, SortByDirection } from '../views/TodoHierarchicView';
+import { ICommand } from '../ICommand';
+import { IDependencies } from '../../../contract/IDependencies';
+import { IContext } from '../../../contract/IContext';
+import { TodoHierarchicView, SortByOption, SortByConfig, SortByDirection } from '../../views/TodoHierarchicView';
 
 class SortByMenuOption {
   constructor(public label: string, public sortByOption: SortByConfig) { }

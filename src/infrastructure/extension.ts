@@ -67,10 +67,10 @@ export function activate(vscontext: vscode.ExtensionContext) {
 	const config = configLoader.loadConfig()
 	const currentFolder = deps.path.join(rootFolder, config.folders.current)
 	const templatesFolder = deps.path.join(rootFolder, config.folders.templates)
-	if (!fs.existsSync(templatesFolder)) {
-		fs.mkdirSync(templatesFolder, { recursive: true })
-		fs.writeFileSync(path.join(templatesFolder, "default.md"), "")
-	}
+	// if (!fs.existsSync(templatesFolder)) {
+	// 	fs.mkdirSync(templatesFolder, { recursive: true })
+	// 	fs.writeFileSync(path.join(templatesFolder, "default.md"), "")
+	// }
 
 	const context: IContext = {
 		rootFolder,

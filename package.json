@@ -294,7 +294,7 @@
 	},
 	"dependencies": {
 		"chrono-node": "^2.3.0",
-		"luxon": "^2.0.1",
+		"luxon": "^2.5.2",
 		"yaml": "^1.10.0"
 	},
 	"icon": "doc/img/middleclass-witch.png",
